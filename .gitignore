@@ -1,0 +1,10 @@
+node_modules/
+dist/
+server/output/
+.env
+*.mp4
+*.jpg
+*.png
+client/dist/
+.claude/settings.local.json
+server/server/

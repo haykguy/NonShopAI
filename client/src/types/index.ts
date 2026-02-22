@@ -5,9 +5,13 @@ export interface ProjectSettings {
   borderWidthPercent: number;
   aspectRatio: '9:16' | '16:9';
   titleYPercent: number;
+  titleXPercent: number;
   titleFontSize: number;
   titleColor: string;
   titleBoxOpacity: number;
+  imageXPercent: number;
+  imageYPercent: number;
+  imageScale: number;
 }
 
 export interface GeneratedImage {

@@ -15,9 +15,7 @@ export function PdfUploader({ onUpload, loading }: Props) {
     e.preventDefault();
     setDragOver(false);
     const file = e.dataTransfer.files[0];
-    if (file && file.type === 'application/pdf') {
-      setSelectedFile(file);
-    }
+    if (file && file.type === 'application/pdf') setSelectedFile(file);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,58 +30,98 @@ export function PdfUploader({ onUpload, loading }: Props) {
   };
 
   return (
-    <div className="space-y-3">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div
         onDragOver={e => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
-        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-          dragOver
-            ? 'border-purple-500 bg-purple-50'
-            : 'border-gray-300 hover:border-gray-400'
-        }`}
+        style={{
+          border: `2px dashed ${dragOver ? 'var(--gold)' : 'var(--border-bright)'}`,
+          borderRadius: 10,
+          padding: '18px 16px',
+          textAlign: 'center',
+          cursor: 'pointer',
+          transition: 'border-color 0.2s, background 0.2s',
+          background: dragOver ? 'var(--gold-dim)' : 'transparent',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 6,
+        }}
+        onMouseEnter={e => {
+          if (!dragOver) (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--text-dim)';
+        }}
+        onMouseLeave={e => {
+          if (!dragOver) (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border-bright)';
+        }}
       >
-        <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-        <p className="text-sm text-gray-600">
-          Drop a PDF script here, or click to browse
-        </p>
-        <p className="text-xs text-gray-400 mt-1">
-          Supports scripts with CLIP/Scene sections containing IMAGE PROMPT and VIDEO PROMPT
-        </p>
+        <Upload size={20} color={dragOver ? 'var(--gold)' : 'var(--text-muted)'} strokeWidth={1.8} />
+        <div>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', fontFamily: 'var(--font-body)', fontWeight: 500 }}>
+            Drop a PDF script here, or click to browse
+          </p>
+          <p style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'var(--font-body)', marginTop: 3, lineHeight: 1.4 }}>
+            Supports scripts with CLIP/Scene sections containing IMAGE PROMPT and VIDEO PROMPT
+          </p>
+        </div>
         <input
           ref={inputRef}
           type="file"
           accept=".pdf"
           onChange={handleFileChange}
-          className="hidden"
+          style={{ display: 'none' }}
         />
       </div>
 
       {selectedFile && (
-        <div className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
-          <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-purple-600" />
-            <span className="text-sm font-medium">{selectedFile.name}</span>
-            <span className="text-xs text-gray-400">
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            background: 'var(--glass-bg-heavy)',
+            border: '1px solid var(--border)',
+            borderRadius: 8,
+            padding: '10px 12px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <FileText size={15} color="var(--gold)" strokeWidth={2} />
+            <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', fontFamily: 'var(--font-body)' }}>
+              {selectedFile.name}
+            </span>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'var(--font-body)' }}>
               ({(selectedFile.size / 1024).toFixed(1)} KB)
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <button
               type="button"
               onClick={() => setSelectedFile(null)}
-              className="p-1 hover:bg-gray-200 rounded"
+              style={{
+                width: 26,
+                height: 26,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'var(--glass-bg)',
+                border: '1px solid var(--border)',
+                borderRadius: 6,
+                cursor: 'pointer',
+                color: 'var(--text-muted)',
+              }}
             >
-              <X className="w-4 h-4 text-gray-500" />
+              <X size={12} strokeWidth={2} />
             </button>
             <button
               type="button"
               onClick={handleUpload}
               disabled={loading}
-              className="px-4 py-1.5 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 disabled:opacity-50"
+              className="btn-gold"
+              style={{ padding: '5px 14px', fontSize: 12 }}
             >
-              {loading ? 'Parsing...' : 'Parse PDF'}
+              {loading ? 'Parsing…' : 'Parse PDF'}
             </button>
           </div>
         </div>

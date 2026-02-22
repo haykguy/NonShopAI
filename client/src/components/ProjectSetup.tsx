@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Project } from '../types';
-import { Settings, Plus, Minus } from 'lucide-react';
+import { Settings, Plus, Minus, Sparkles } from 'lucide-react';
 
 interface Props {
   onCreateProject: (name: string, clipCount: number, settings: any) => Promise<Project>;
@@ -20,39 +20,109 @@ export function ProjectSetup({ onCreateProject, loading }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold mb-1 flex items-center gap-2">
-          <Settings className="w-5 h-5 text-purple-600" />
-          New Project
-        </h2>
-        <p className="text-xs text-gray-400 mb-4">
+    <form onSubmit={handleSubmit}>
+      <div
+        style={{
+          background: 'var(--card)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius)',
+          padding: '24px 28px',
+          marginBottom: 16,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+          <div
+            style={{
+              width: 30,
+              height: 30,
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: 8,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Settings size={14} color="var(--gold)" strokeWidth={2} />
+          </div>
+          <h2
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 16,
+              fontWeight: 700,
+              color: 'var(--text)',
+              letterSpacing: '-0.01em',
+            }}
+          >
+            New Project
+          </h2>
+        </div>
+        <p style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 24, fontFamily: 'var(--font-body)', paddingLeft: 40 }}>
           Layout settings (borders, text, aspect ratio) are configured in the visual mockup on the next screen.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          {/* Project Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Project Name</label>
+            <label
+              style={{
+                display: 'block',
+                fontSize: 12,
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                fontFamily: 'var(--font-body)',
+                marginBottom: 6,
+                letterSpacing: '0.01em',
+              }}
+            >
+              Project Name
+            </label>
             <input
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="My Video Project"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+              className="ns-input"
             />
           </div>
 
+          {/* Clip Count */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Number of Clips: {clipCount}
+            <label
+              style={{
+                display: 'block',
+                fontSize: 12,
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                fontFamily: 'var(--font-body)',
+                marginBottom: 6,
+              }}
+            >
+              Number of Clips:{' '}
+              <span style={{ color: 'var(--gold)', fontFamily: 'var(--font-mono)' }}>{clipCount}</span>
             </label>
-            <div className="flex items-center gap-3">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <button
                 type="button"
                 onClick={() => setClipCount(Math.max(1, clipCount - 1))}
-                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50"
+                style={{
+                  width: 32,
+                  height: 32,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  color: 'var(--text-muted)',
+                  flexShrink: 0,
+                  transition: 'border-color 0.15s',
+                }}
+                onMouseEnter={e => ((e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-bright)')}
+                onMouseLeave={e => ((e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border)')}
               >
-                <Minus className="w-4 h-4" />
+                <Minus size={14} />
               </button>
               <input
                 type="range"
@@ -60,27 +130,70 @@ export function ProjectSetup({ onCreateProject, loading }: Props) {
                 max={20}
                 value={clipCount}
                 onChange={e => setClipCount(parseInt(e.target.value))}
-                className="flex-1"
+                style={{
+                  flex: 1,
+                  accentColor: 'var(--gold)',
+                  cursor: 'pointer',
+                }}
               />
               <button
                 type="button"
                 onClick={() => setClipCount(Math.min(20, clipCount + 1))}
-                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50"
+                style={{
+                  width: 32,
+                  height: 32,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  color: 'var(--text-muted)',
+                  flexShrink: 0,
+                  transition: 'border-color 0.15s',
+                }}
+                onMouseEnter={e => ((e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-bright)')}
+                onMouseLeave={e => ((e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border)')}
               >
-                <Plus className="w-4 h-4" />
+                <Plus size={14} />
               </button>
             </div>
           </div>
 
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Image Selection</label>
+          {/* Image Selection — full width */}
+          <div style={{ gridColumn: '1 / -1' }}>
+            <label
+              style={{
+                display: 'block',
+                fontSize: 12,
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                fontFamily: 'var(--font-body)',
+                marginBottom: 6,
+              }}
+            >
+              Image Selection
+            </label>
             <select
               value={autoPickImage ? 'auto' : 'review'}
               onChange={e => setAutoPickImage(e.target.value === 'auto')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+              style={{
+                width: '100%',
+                padding: '10px 14px',
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
+                color: 'var(--text)',
+                fontFamily: 'var(--font-body)',
+                fontSize: 14,
+                outline: 'none',
+                cursor: 'pointer',
+                appearance: 'auto',
+              }}
             >
-              <option value="auto">Auto-pick first image (faster)</option>
-              <option value="review">Generate 4 images, let me choose</option>
+              <option value="auto" style={{ background: 'var(--surface)' }}>Auto-pick first image (faster)</option>
+              <option value="review" style={{ background: 'var(--surface)' }}>Generate 4 images, let me choose</option>
             </select>
           </div>
         </div>
@@ -89,9 +202,11 @@ export function ProjectSetup({ onCreateProject, loading }: Props) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3 px-6 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="btn-gold"
+        style={{ width: '100%', padding: '14px 24px', fontSize: 15, borderRadius: 10, justifyContent: 'center' }}
       >
-        {loading ? 'Creating...' : 'Create Project'}
+        <Sparkles size={15} strokeWidth={2.5} />
+        {loading ? 'Creating…' : 'Create Project'}
       </button>
     </form>
   );

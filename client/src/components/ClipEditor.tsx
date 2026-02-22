@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Edit3, ChevronDown, ChevronUp } from 'lucide-react';
+import { PencilLine, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface ClipData {
   imagePrompt: string;
@@ -16,32 +16,89 @@ export function ClipEditor({ index, clip, onChange }: Props) {
   const [expanded, setExpanded] = useState(true);
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div
+      style={{
+        border: '1px solid var(--border)',
+        borderRadius: 12,
+        overflow: 'hidden',
+        background: 'var(--glass-bg)',
+      }}
+    >
+      {/* Collapse header */}
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '10px 14px',
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          transition: 'background 0.15s',
+        }}
+        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--glass-bg-heavy)'; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
       >
-        <div className="flex items-center gap-2">
-          <Edit3 className="w-4 h-4 text-purple-600" />
-          <span className="font-medium text-sm">Clip {index + 1}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <PencilLine size={13} color="var(--gold)" strokeWidth={2} />
+          <span
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontWeight: 600,
+              fontSize: 13,
+              color: 'var(--text)',
+            }}
+          >
+            Clip {index + 1}
+          </span>
           {clip.imagePrompt && (
-            <span className="text-xs text-gray-400 truncate max-w-[200px]">
-              — {clip.imagePrompt.substring(0, 40)}...
+            <span
+              style={{
+                fontSize: 11,
+                color: 'var(--text-muted)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: 180,
+              }}
+            >
+              — {clip.imagePrompt.substring(0, 40)}{clip.imagePrompt.length > 40 ? '…' : ''}
             </span>
           )}
         </div>
-        {expanded ? (
-          <ChevronUp className="w-4 h-4 text-gray-400" />
-        ) : (
-          <ChevronDown className="w-4 h-4 text-gray-400" />
-        )}
+        {expanded
+          ? <ChevronUp size={14} color="var(--text-muted)" strokeWidth={2} />
+          : <ChevronDown size={14} color="var(--text-muted)" strokeWidth={2} />
+        }
       </button>
 
+      {/* Expanded fields */}
       {expanded && (
-        <div className="p-4 space-y-3">
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+        <div
+          style={{
+            padding: '0 14px 14px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 12,
+            borderTop: '1px solid var(--separator)',
+          }}
+        >
+          <div style={{ paddingTop: 12 }}>
+            <label
+              style={{
+                display: 'block',
+                fontSize: 11,
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                marginBottom: 6,
+                fontFamily: 'var(--font-body)',
+              }}
+            >
               Image Prompt
             </label>
             <textarea
@@ -49,11 +106,39 @@ export function ClipEditor({ index, clip, onChange }: Props) {
               onChange={e => onChange({ ...clip, imagePrompt: e.target.value })}
               rows={3}
               placeholder="Describe the image to generate..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none resize-vertical"
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                fontSize: 13,
+                fontFamily: 'var(--font-body)',
+                background: 'var(--glass-bg)',
+                border: '1px solid var(--border)',
+                borderRadius: 8,
+                color: 'var(--text)',
+                outline: 'none',
+                resize: 'vertical',
+                lineHeight: 1.55,
+                transition: 'border-color 0.15s',
+                boxSizing: 'border-box',
+              }}
+              onFocus={e => { e.currentTarget.style.borderColor = 'var(--gold)'; }}
+              onBlur={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}
             />
           </div>
+
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label
+              style={{
+                display: 'block',
+                fontSize: 11,
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                marginBottom: 6,
+                fontFamily: 'var(--font-body)',
+              }}
+            >
               Video Prompt
             </label>
             <textarea
@@ -61,7 +146,23 @@ export function ClipEditor({ index, clip, onChange }: Props) {
               onChange={e => onChange({ ...clip, videoPrompt: e.target.value })}
               rows={3}
               placeholder="Describe the video motion/action..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none resize-vertical"
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                fontSize: 13,
+                fontFamily: 'var(--font-body)',
+                background: 'var(--glass-bg)',
+                border: '1px solid var(--border)',
+                borderRadius: 8,
+                color: 'var(--text)',
+                outline: 'none',
+                resize: 'vertical',
+                lineHeight: 1.55,
+                transition: 'border-color 0.15s',
+                boxSizing: 'border-box',
+              }}
+              onFocus={e => { e.currentTarget.style.borderColor = 'var(--blue)'; }}
+              onBlur={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}
             />
           </div>
         </div>

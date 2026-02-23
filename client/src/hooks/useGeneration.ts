@@ -6,6 +6,7 @@ export function useGeneration(projectId: string | null) {
   const [clips, setClips] = useState<Clip[]>([]);
   const [connected, setConnected] = useState(false);
   const [pendingReview, setPendingReview] = useState<number | null>(null);
+  const [pipelineError, setPipelineError] = useState<string | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
 
   const connect = useCallback(() => {
@@ -14,16 +15,30 @@ export function useGeneration(projectId: string | null) {
     const es = new EventSource(`/api/projects/${projectId}/status`);
     eventSourceRef.current = es;
 
-    es.onopen = () => setConnected(true);
+    es.onopen = () => {
+      console.log(`[useGeneration] SSE connected for project ${projectId}`);
+      setConnected(true);
+    };
 
     es.onmessage = (e) => {
       try {
         const event: PipelineEvent = JSON.parse(e.data);
+        console.log(`[useGeneration] Event: ${event.type}`, event);
         setEvents(prev => [...prev, event]);
 
         // Handle specific events
         if (event.type === 'initial_state' && event.data?.clips) {
           setClips(event.data.clips);
+        }
+
+        if (event.type === 'no_pipeline') {
+          console.warn(`[useGeneration] no_pipeline:`, event.data?.message);
+          // Only set an error if the server sent back a reset project (was stuck in 'generating')
+          if (event.data?.project) {
+            setPipelineError(event.data.message ?? 'Server restarted mid-generation.');
+            setClips(event.data.project.clips);
+          }
+          // If no project data, it's just a normal draft — ignore silently
         }
 
         if (event.type === 'clip_status_changed' && event.clipIndex !== undefined) {
@@ -41,6 +56,7 @@ export function useGeneration(projectId: string | null) {
         }
 
         if (event.type === 'clip_failed' && event.clipIndex !== undefined) {
+          console.error(`[useGeneration] Clip ${event.clipIndex} failed:`, event.data?.error);
           setClips(prev => prev.map(c =>
             c.index === event.clipIndex
               ? { ...c, status: 'failed', error: event.data?.error }
@@ -67,13 +83,21 @@ export function useGeneration(projectId: string | null) {
           setPendingReview(null);
         }
 
-        if (event.type === 'pipeline_completed' || event.type === 'pipeline_error') {
-          // Pipeline done - refresh full state
+        if (event.type === 'pipeline_error') {
+          console.error(`[useGeneration] Pipeline error:`, event.data?.message);
+          setPipelineError(event.data?.message ?? 'Pipeline failed');
         }
-      } catch {}
+
+        if (event.type === 'pipeline_completed') {
+          console.log(`[useGeneration] Pipeline completed:`, event.data);
+        }
+      } catch (parseErr) {
+        console.error('[useGeneration] Failed to parse SSE event:', e.data, parseErr);
+      }
     };
 
-    es.onerror = () => {
+    es.onerror = (err) => {
+      console.error(`[useGeneration] SSE error for project ${projectId}:`, err);
       setConnected(false);
     };
 
@@ -103,6 +127,7 @@ export function useGeneration(projectId: string | null) {
     clips,
     connected,
     pendingReview,
+    pipelineError,
     progress,
     completedCount,
     failedCount,

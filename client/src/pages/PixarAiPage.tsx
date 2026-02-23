@@ -34,9 +34,7 @@ export function PixarAiPage() {
     compileVideo,
   } = useProject();
 
-  const gen = useGeneration(
-    project?.status === 'generating' ? project.id : null
-  );
+  const gen = useGeneration(project?.id ?? null);
 
   const [step, setStep] = useState<Step>('clips');
   const [clipDrafts, setClipDrafts] = useState<
@@ -128,6 +126,14 @@ export function PixarAiPage() {
       setStep('compile');
     }
   }, [gen.completedCount, gen.failedCount, gen.totalCount]);
+
+  // Handle no_pipeline (server restart / stale state) — surface error and go back to clips
+  useEffect(() => {
+    if (gen.pipelineError && step === 'generating') {
+      setError(gen.pipelineError);
+      setStep('clips');
+    }
+  }, [gen.pipelineError, step]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const reviewClip = gen.pendingReview !== null
     ? gen.clips.find(c => c.index === gen.pendingReview)

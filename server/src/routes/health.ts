@@ -4,7 +4,7 @@ import { logger } from '../utils/logger';
 
 const router = Router();
 
-router.get('/', async (_req, res, next) => {
+router.get('/', async (_req, res) => {
   try {
     const accounts = await apiClient.getAccounts();
     const emails = Object.keys(accounts);
@@ -42,8 +42,14 @@ router.get('/', async (_req, res, next) => {
         })),
       },
     });
-  } catch (error) {
-    next(error);
+  } catch (err: any) {
+    // Return a graceful degraded response instead of a 500 — the UI handles this
+    logger.warn(`Health check failed: ${err.message}`);
+    res.json({
+      status: 'error',
+      message: err.message,
+      accounts: {},
+    });
   }
 });
 

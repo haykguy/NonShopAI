@@ -6,6 +6,7 @@ import {
   setPipeline,
   removePipeline,
 } from '../services/pipeline';
+import { saveProjectAsync } from '../services/projectStore';
 import { apiClient } from '../services/useapi';
 import { logger } from '../utils/logger';
 
@@ -41,15 +42,28 @@ router.post('/:id/generate', async (req: Request, res: Response, next) => {
 
     // Auto-detect account email if not set
     if (!project.accountEmail) {
+      logger.info(`No account email set for project ${project.id}, fetching accounts...`);
       const accounts = await apiClient.getAccounts();
       const emails = Object.keys(accounts);
       if (emails.length === 0) {
+        logger.error('No Google Flow accounts configured in useapi.net');
         res.status(400).json({ error: 'No Google Flow accounts configured' });
         return;
       }
       project.accountEmail = emails[0];
       logger.info(`Auto-selected account: ${project.accountEmail}`);
     }
+
+    logger.info(`Starting pipeline for project ${project.id} with ${project.clips.length} clips (account: ${project.accountEmail})`);
+
+    // Reset any previously-failed/skipped clips back to pending so they get retried
+    project.clips.forEach(clip => {
+      if (clip.status === 'failed' || clip.status === 'skipped') {
+        clip.status = 'pending';
+        clip.error = undefined;
+        clip.retryCount = 0;
+      }
+    });
 
     // Create and start pipeline
     const pipeline = new PipelineOrchestrator(project);
@@ -58,9 +72,11 @@ router.post('/:id/generate', async (req: Request, res: Response, next) => {
     // Start pipeline in background (don't await)
     pipeline.run().then(() => {
       logger.info(`Pipeline completed for project ${project.id}`);
+      removePipeline(project.id);
     }).catch(err => {
-      logger.error(`Pipeline error for project ${project.id}: ${err.message}`);
+      logger.error(`Pipeline error for project ${project.id}: ${err.message}`, err.stack);
       project.status = 'error';
+      removePipeline(project.id);
     });
 
     res.json({
@@ -124,7 +140,8 @@ router.post('/:id/clips/:clipIndex/select-image', (req: Request, res: Response) 
 
 // GET /api/projects/:id/status - SSE endpoint for real-time progress
 router.get('/:id/status', (req: Request, res: Response) => {
-  const project = getProject(paramStr(req.params.id));
+  const projectId = paramStr(req.params.id);
+  const project = getProject(projectId);
   if (!project) {
     res.status(404).json({ error: 'Project not found' });
     return;
@@ -145,13 +162,31 @@ router.get('/:id/status', (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
   })}\n\n`);
 
-  const pipeline = getPipeline(paramStr(req.params.id));
+  const pipeline = getPipeline(projectId);
+
   if (!pipeline) {
-    res.write(`data: ${JSON.stringify({
-      type: 'no_pipeline',
-      projectId: project.id,
-      timestamp: new Date().toISOString(),
-    })}\n\n`);
+    // Only treat as an error if the project was mid-generation (e.g. server restarted)
+    if (project.status === 'generating') {
+      logger.warn(`Project ${projectId} is 'generating' but has no active pipeline — resetting to error`);
+      project.status = 'error';
+      project.clips.forEach(clip => {
+        if (clip.status !== 'completed' && clip.status !== 'skipped') {
+          clip.status = 'failed';
+          clip.error = 'Server restarted while pipeline was running';
+        }
+      });
+      saveProjectAsync(project);
+      res.write(`data: ${JSON.stringify({
+        type: 'no_pipeline',
+        projectId: project.id,
+        data: { message: 'Server restarted mid-generation. Please start generation again.', project },
+        timestamp: new Date().toISOString(),
+      })}\n\n`);
+    }
+    // For draft/completed/error projects with no pipeline, no event needed — just stream keepalives
+    logger.info(`SSE connected for project ${projectId} (no active pipeline, status: ${project.status})`);
+  } else {
+    logger.info(`SSE connected for project ${projectId} (pipeline running: ${pipeline.isRunning()})`);
   }
 
   // Listen for pipeline events
@@ -173,6 +208,7 @@ router.get('/:id/status', (req: Request, res: Response) => {
     if (pipeline) {
       pipeline.off('progress', listener);
     }
+    logger.info(`SSE disconnected for project ${projectId}`);
   });
 });
 

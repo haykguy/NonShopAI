@@ -36,27 +36,28 @@ export class PipelineOrchestrator extends EventEmitter {
     this.project.status = 'generating';
     this.emit_event('pipeline_started');
 
-    try {
-      const clipsToProcess = this.project.clips.filter(
-        c => c.status !== 'completed' && c.status !== 'skipped'
-      );
+    const clipsToProcess = this.project.clips.filter(
+      c => c.status !== 'completed' && c.status !== 'skipped'
+    );
+    logger.info(`[Pipeline] Starting for project ${this.project.id}: ${clipsToProcess.length} clips to process (${this.project.clips.length} total)`);
 
+    try {
       await Promise.allSettled(
         clipsToProcess.map(async (clip) => {
           if (this.aborted) {
-            logger.info('Pipeline aborted by user');
+            logger.info(`[Pipeline] Aborted — skipping clip ${clip.index}`);
             return;
           }
 
           try {
             await this.processClip(clip);
           } catch (error: any) {
-            logger.error(`Clip ${clip.index} failed after retries: ${error.message}`);
+            logger.error(`[Pipeline] Clip ${clip.index} failed: ${error.message}`, error.stack);
             clip.status = 'failed';
             clip.error = error.message;
             this.emit_event('clip_failed', clip.index, { error: error.message });
 
-            // Mark as skipped and continue
+            // Mark as skipped and continue with remaining clips
             clip.status = 'skipped';
             this.emit_event('clip_skipped', clip.index);
           }
@@ -66,11 +67,14 @@ export class PipelineOrchestrator extends EventEmitter {
       const completedClips = this.project.clips.filter(c => c.status === 'completed');
       const skippedClips = this.project.clips.filter(c => c.status === 'skipped');
 
+      logger.info(`[Pipeline] Done — completed: ${completedClips.length}, skipped: ${skippedClips.length}, total: ${this.project.clips.length}`);
+
       if (completedClips.length === 0) {
         this.project.status = 'error';
-        this.emit_event('pipeline_error', undefined, { message: 'No clips completed' });
+        logger.error(`[Pipeline] All clips failed for project ${this.project.id}`);
+        this.emit_event('pipeline_error', undefined, { message: 'No clips completed successfully' });
       } else {
-        this.project.status = this.aborted ? 'draft' : 'draft'; // Ready for compilation
+        this.project.status = 'draft'; // Ready for compilation
         this.emit_event('pipeline_completed', undefined, {
           completed: completedClips.length,
           skipped: skippedClips.length,
@@ -86,13 +90,16 @@ export class PipelineOrchestrator extends EventEmitter {
 
   private async processClip(clip: Clip): Promise<void> {
     const autoPickImage = this.project.settings.autoPickImage;
+    logger.info(`[Clip ${clip.index}] Starting — autoPickImage: ${autoPickImage}`);
 
     // Step 1: Generate image
     clip.status = 'generating_image';
     clip.retryCount = 0;
     this.emit_event('clip_status_changed', clip.index, { status: clip.status });
+    logger.info(`[Clip ${clip.index}] Generating image...`);
 
     await generateImage(clip, this.project.id, autoPickImage, this.project.accountEmail);
+    logger.info(`[Clip ${clip.index}] Image generated — localImagePath: ${clip.localImagePath}`);
 
     if (!autoPickImage && clip.generatedImages && clip.generatedImages.length > 1) {
       // Wait for user to select an image
@@ -100,12 +107,15 @@ export class PipelineOrchestrator extends EventEmitter {
       this.emit_event('image_review_needed', clip.index, {
         images: clip.generatedImages,
       });
+      logger.info(`[Clip ${clip.index}] Awaiting user image selection...`);
 
       // Wait for selection (will be resolved by selectImage method)
       await this.waitForImageSelection(clip);
+      logger.info(`[Clip ${clip.index}] Image selected: index ${clip.selectedImageIndex}`);
 
       // Download the selected image
       await downloadSelectedImage(clip, this.project.id);
+      logger.info(`[Clip ${clip.index}] Selected image downloaded: ${clip.localImagePath}`);
     }
 
     // Step 2: Upload image as asset
@@ -116,16 +126,20 @@ export class PipelineOrchestrator extends EventEmitter {
       throw new Error(`Clip ${clip.index}: no local image path after generation`);
     }
 
+    logger.info(`[Clip ${clip.index}] Uploading image asset: ${clip.localImagePath}`);
     clip.uploadedMediaGenerationId = await uploadImageAsAsset(
       clip.localImagePath,
       this.project.accountEmail
     );
+    logger.info(`[Clip ${clip.index}] Asset uploaded — mediaGenerationId: ${clip.uploadedMediaGenerationId}`);
 
     // Step 3: Generate video
     clip.status = 'generating_video';
     this.emit_event('clip_status_changed', clip.index, { status: clip.status });
+    logger.info(`[Clip ${clip.index}] Generating video...`);
 
     await generateVideo(clip, this.project.id, this.project.accountEmail, (status, elapsed) => {
+      logger.info(`[Clip ${clip.index}] Video job status: ${status} (${Math.round(elapsed / 1000)}s elapsed)`);
       this.emit_event('video_progress', clip.index, {
         jobStatus: status,
         elapsed: Math.round(elapsed / 1000),
@@ -135,7 +149,7 @@ export class PipelineOrchestrator extends EventEmitter {
     // Done
     clip.status = 'completed';
     this.emit_event('clip_completed', clip.index);
-    logger.info(`Clip ${clip.index} completed successfully`);
+    logger.info(`[Clip ${clip.index}] Completed successfully — video: ${clip.localVideoPath}`);
   }
 
   private waitForImageSelection(clip: Clip): Promise<void> {

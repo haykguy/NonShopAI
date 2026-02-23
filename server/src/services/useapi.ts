@@ -79,7 +79,7 @@ class UseApiClient {
     } = {}
   ): Promise<ImageGenResponse> {
     return withRetry(() =>
-      this.request<ImageGenResponse>('POST', '/images', {
+      this.request<ImageGenResponse>('POST', '/v1/google-flow/images', {
         prompt,
         model: opts.model || 'nano-banana-pro',
         aspectRatio: opts.aspectRatio || 'portrait',
@@ -95,7 +95,7 @@ class UseApiClient {
     contentType: string,
     email?: string
   ): Promise<AssetUploadResponse> {
-    const path = email ? `/assets/${encodeURIComponent(email)}` : '/assets';
+    const path = email ? `/v1/google-flow/assets/${encodeURIComponent(email)}` : '/v1/google-flow/assets';
     return withRetry(() =>
       this.request<AssetUploadResponse>('POST', path, imageBuffer, {
         'Content-Type': contentType,
@@ -118,7 +118,7 @@ class UseApiClient {
     } = {}
   ): Promise<VideoGenAsyncResponse> {
     return withRetry(() =>
-      this.request<VideoGenAsyncResponse>('POST', '/videos', {
+      this.request<VideoGenAsyncResponse>('POST', '/v1/google-flow/videos', {
         prompt,
         model: opts.model || 'veo-3.1-fast',
         aspectRatio: opts.aspectRatio || 'portrait',
@@ -147,7 +147,7 @@ class UseApiClient {
   ): Promise<VideoGenSyncResponse> {
     return withRetry(
       () =>
-        this.request<VideoGenSyncResponse>('POST', '/videos', {
+        this.request<VideoGenSyncResponse>('POST', '/v1/google-flow/videos', {
           prompt,
           model: opts.model || 'veo-3.1-fast',
           aspectRatio: opts.aspectRatio || 'portrait',
@@ -162,18 +162,18 @@ class UseApiClient {
   }
 
   async getJobStatus(jobId: string): Promise<JobStatusResponse> {
-    return this.request<JobStatusResponse>('GET', `/jobs/${jobId}`);
+    return this.request<JobStatusResponse>('GET', `/v1/google-flow/jobs/${jobId}`);
   }
 
   async getAccounts(): Promise<AccountsResponse> {
     return withRetry(() =>
-      this.request<AccountsResponse>('GET', '/accounts')
+      this.request<AccountsResponse>('GET', '/v1/google-flow/accounts')
     );
   }
 
   async getAccountHealth(email: string): Promise<AccountHealthResponse> {
     return withRetry(() =>
-      this.request<AccountHealthResponse>('GET', `/accounts/${encodeURIComponent(email)}`)
+      this.request<AccountHealthResponse>('GET', `/v1/google-flow/accounts/${encodeURIComponent(email)}`)
     );
   }
 }

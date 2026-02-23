@@ -15,15 +15,19 @@ export function AccountHealth() {
 
   if (error) {
     return (
-      <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">
-        <AlertCircle className="w-4 h-4" />
-        <span>API Error: {error}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-muted)', padding: '6px 0' }}>
+        <AlertCircle size={13} style={{ flexShrink: 0, color: 'var(--error)' }} />
+        <span>API unreachable — check server</span>
       </div>
     );
   }
 
   if (!health) {
-    return <div className="text-sm text-gray-400">Checking API connection...</div>;
+    return (
+      <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '6px 0' }}>
+        Checking API connection…
+      </div>
+    );
   }
 
   const acct = health.primaryAccount;

@@ -87,6 +87,7 @@ export function Step4Avatar({ selected, renderMode, onSelect, onContinue }: Prop
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
   const [selectedImageIdx, setSelectedImageIdx] = useState<number | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
 
   // Fetch library
   useEffect(() => {
@@ -115,6 +116,7 @@ export function Step4Avatar({ selected, renderMode, onSelect, onContinue }: Prop
     setIsGenerating(true);
     setGeneratedImages([]);
     setSelectedImageIdx(null);
+    setGenerationError(null);
 
     try {
       const res = await fetch('/api/images/generate', {
@@ -122,13 +124,39 @@ export function Step4Avatar({ selected, renderMode, onSelect, onContinue }: Prop
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, count: 4 }),
       });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || `API error: ${res.status}`);
+      }
+
       const data = await res.json();
+      console.log('[Avatar Generation] Response:', data);
+
+      // Extract image URLs from response
       const imgs: string[] = Array.isArray(data.images)
-        ? data.images.map((img: any) => img.url || img.fifeUrl || img)
+        ? data.images.map((img: any) => {
+            // Handle different response formats
+            if (typeof img === 'string') return img;
+            if (img.url) return img.url;
+            if (img.fifeUrl) return img.fifeUrl;
+            return '';
+          }).filter(Boolean)
         : [];
-      setGeneratedImages(imgs.length > 0 ? imgs : ['', '', '', '']);
-    } catch {
-      // mock: 4 placeholder slots
+
+      console.log('[Avatar Generation] Extracted images:', imgs.length);
+
+      if (imgs.length === 0) {
+        setGenerationError('No images were generated. This might be a temporary issue. Please try again.');
+        setGeneratedImages(['', '', '', '']);
+      } else {
+        setGeneratedImages(imgs);
+        setGenerationError(null);
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to generate images';
+      console.error('[Avatar Generation] Error:', errorMsg);
+      setGenerationError(errorMsg);
       setGeneratedImages(['', '', '', '']);
     } finally {
       setIsGenerating(false);
@@ -555,6 +583,24 @@ export function Step4Avatar({ selected, renderMode, onSelect, onContinue }: Prop
                   />
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Error message */}
+          {generationError && (
+            <div
+              style={{
+                padding: '12px 16px',
+                background: 'rgba(239,68,68,0.10)',
+                border: '1px solid rgba(239,68,68,0.30)',
+                borderRadius: 10,
+                fontSize: 13,
+                color: '#ef4444',
+                fontFamily: 'var(--font-body)',
+                marginBottom: 16,
+              }}
+            >
+              {generationError}
             </div>
           )}
 

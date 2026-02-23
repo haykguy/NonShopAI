@@ -3,8 +3,11 @@ import { Project, Clip, PipelineEvent } from '../types/project';
 import { generateImage, downloadSelectedImage } from './imageGen';
 import { uploadImageAsAsset } from './assetUpload';
 import { generateVideo } from './videoGen';
+import { downloadFile } from './downloader';
 import { logger } from '../utils/logger';
 import { saveProjectAsync } from './projectStore';
+import { config } from '../config';
+import path from 'path';
 
 export class PipelineOrchestrator extends EventEmitter {
   private project: Project;
@@ -90,32 +93,51 @@ export class PipelineOrchestrator extends EventEmitter {
 
   private async processClip(clip: Clip): Promise<void> {
     const autoPickImage = this.project.settings.autoPickImage;
-    logger.info(`[Clip ${clip.index}] Starting — autoPickImage: ${autoPickImage}`);
+    logger.info(`[Clip ${clip.index}] Starting — autoPickImage: ${autoPickImage}, hasAvatarImage: ${!!clip.avatarImageUrl}`);
 
-    // Step 1: Generate image
+    // Step 1: Generate or download avatar image
     clip.status = 'generating_image';
     clip.retryCount = 0;
     this.emit_event('clip_status_changed', clip.index, { status: clip.status });
-    logger.info(`[Clip ${clip.index}] Generating image...`);
 
-    await generateImage(clip, this.project.id, autoPickImage, this.project.accountEmail);
-    logger.info(`[Clip ${clip.index}] Image generated — localImagePath: ${clip.localImagePath}`);
+    if (clip.avatarImageUrl) {
+      // Skip image generation and use the provided avatar image
+      logger.info(`[Clip ${clip.index}] Skipping image generation — downloading avatar image from ${clip.avatarImageUrl}`);
+      const imagePath = path.join(
+        config.outputDir,
+        'images',
+        `${this.project.id}_clip_${clip.index}_avatar.jpg`
+      );
+      try {
+        await downloadFile(clip.avatarImageUrl, imagePath);
+        clip.localImagePath = imagePath;
+        logger.info(`[Clip ${clip.index}] Avatar image downloaded to ${imagePath}`);
+      } catch (err: any) {
+        logger.error(`[Clip ${clip.index}] Failed to download avatar image: ${err.message}`, err.stack ?? err);
+        throw err;
+      }
+    } else {
+      // Generate image normally
+      logger.info(`[Clip ${clip.index}] Generating image...`);
+      await generateImage(clip, this.project.id, autoPickImage, this.project.accountEmail);
+      logger.info(`[Clip ${clip.index}] Image generated — localImagePath: ${clip.localImagePath}`);
 
-    if (!autoPickImage && clip.generatedImages && clip.generatedImages.length > 1) {
-      // Wait for user to select an image
-      clip.status = 'reviewing_image';
-      this.emit_event('image_review_needed', clip.index, {
-        images: clip.generatedImages,
-      });
-      logger.info(`[Clip ${clip.index}] Awaiting user image selection...`);
+      if (!autoPickImage && clip.generatedImages && clip.generatedImages.length > 1) {
+        // Wait for user to select an image
+        clip.status = 'reviewing_image';
+        this.emit_event('image_review_needed', clip.index, {
+          images: clip.generatedImages,
+        });
+        logger.info(`[Clip ${clip.index}] Awaiting user image selection...`);
 
-      // Wait for selection (will be resolved by selectImage method)
-      await this.waitForImageSelection(clip);
-      logger.info(`[Clip ${clip.index}] Image selected: index ${clip.selectedImageIndex}`);
+        // Wait for selection (will be resolved by selectImage method)
+        await this.waitForImageSelection(clip);
+        logger.info(`[Clip ${clip.index}] Image selected: index ${clip.selectedImageIndex}`);
 
-      // Download the selected image
-      await downloadSelectedImage(clip, this.project.id);
-      logger.info(`[Clip ${clip.index}] Selected image downloaded: ${clip.localImagePath}`);
+        // Download the selected image
+        await downloadSelectedImage(clip, this.project.id);
+        logger.info(`[Clip ${clip.index}] Selected image downloaded: ${clip.localImagePath}`);
+      }
     }
 
     // Step 2: Upload image as asset

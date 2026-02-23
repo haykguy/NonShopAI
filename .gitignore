@@ -6,5 +6,5 @@ server/output/
 *.jpg
 *.png
 client/dist/
-.claude/settings.local.json
+.claude/
 server/server/

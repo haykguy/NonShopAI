@@ -45,40 +45,56 @@ router.get('/', (_req, res) => {
 });
 
 // POST /api/projects - create new project
-router.post('/', async (req, res) => {
-  const { name, clipCount, settings } = req.body;
-  const count = Math.max(1, Math.min(20, clipCount || 7));
+router.post('/', async (req, res, next) => {
+  try {
+    const { name, clipCount, settings, clips: bodyClips } = req.body;
+    const count = Math.max(1, Math.min(20, clipCount || 7));
 
-  const clips: Clip[] = Array.from({ length: count }, (_, i): Clip => ({
-    index: i,
-    imagePrompt: '',
-    videoPrompt: '',
-    status: 'pending',
-    retryCount: 0,
-  }));
+    // If caller passes pre-built clips array, use it; otherwise create empty ones
+    let clips: Clip[];
+    if (Array.isArray(bodyClips) && bodyClips.length > 0) {
+      clips = bodyClips.map((c: any, i: number): Clip => ({
+        index: i,
+        imagePrompt: c.imagePrompt || '',
+        videoPrompt: c.videoPrompt || '',
+        status: 'pending',
+        retryCount: 0,
+      }));
+    } else {
+      clips = Array.from({ length: count }, (_, i): Clip => ({
+        index: i,
+        imagePrompt: '',
+        videoPrompt: '',
+        status: 'pending',
+        retryCount: 0,
+      }));
+    }
 
-  const project: Project = {
-    id: uuidv4(),
-    name: name || `Project ${new Date().toLocaleDateString()}`,
-    createdAt: new Date().toISOString(),
-    status: 'draft',
-    settings: {
-      titleText: settings?.titleText || '',
-      titlePosition: settings?.titlePosition || 'bottom',
-      autoPickImage: settings?.autoPickImage ?? true,
-      borderWidthPercent: settings?.borderWidthPercent ?? 5,
-      aspectRatio: settings?.aspectRatio || '9:16',
-      titleYPercent: settings?.titleYPercent ?? 85,
-      titleFontSize: settings?.titleFontSize ?? 42,
-      titleColor: settings?.titleColor || '#ffffff',
-      titleBoxOpacity: settings?.titleBoxOpacity ?? 0.6,
-    },
-    clips,
-  };
+    const project: Project = {
+      id: uuidv4(),
+      name: name || `Project ${new Date().toLocaleDateString()}`,
+      createdAt: new Date().toISOString(),
+      status: 'draft',
+      settings: {
+        titleText: settings?.titleText || '',
+        titlePosition: settings?.titlePosition || 'bottom',
+        autoPickImage: settings?.autoPickImage ?? true,
+        borderWidthPercent: settings?.borderWidthPercent ?? 5,
+        aspectRatio: settings?.aspectRatio || '9:16',
+        titleYPercent: settings?.titleYPercent ?? 85,
+        titleFontSize: settings?.titleFontSize ?? 42,
+        titleColor: settings?.titleColor || '#ffffff',
+        titleBoxOpacity: settings?.titleBoxOpacity ?? 0.6,
+      },
+      clips,
+    };
 
-  await storeSet(project);
-  logger.info(`Project created: ${project.id} with ${count} clips`);
-  res.status(201).json(project);
+    await storeSet(project);
+    logger.info(`Project created: ${project.id} with ${clips.length} clips`);
+    res.status(201).json(project);
+  } catch (error) {
+    next(error);
+  }
 });
 
 // GET /api/projects/:id - get project details
@@ -92,50 +108,58 @@ router.get('/:id', (req, res) => {
 });
 
 // PUT /api/projects/:id - update project settings
-router.put('/:id', async (req, res) => {
-  const project = storeGet(paramStr(req.params.id));
-  if (!project) {
-    res.status(404).json({ error: 'Project not found' });
-    return;
-  }
+router.put('/:id', async (req, res, next) => {
+  try {
+    const project = storeGet(paramStr(req.params.id));
+    if (!project) {
+      res.status(404).json({ error: 'Project not found' });
+      return;
+    }
 
-  const { name, settings, accountEmail } = req.body;
-  if (name) project.name = name;
-  if (accountEmail) project.accountEmail = accountEmail;
-  if (settings) {
-    Object.assign(project.settings, settings);
-  }
+    const { name, settings, accountEmail } = req.body;
+    if (name) project.name = name;
+    if (accountEmail) project.accountEmail = accountEmail;
+    if (settings) {
+      Object.assign(project.settings, settings);
+    }
 
-  await storeSet(project);
-  res.json(project);
+    await storeSet(project);
+    res.json(project);
+  } catch (error) {
+    next(error);
+  }
 });
 
 // PUT /api/projects/:id/clips - update all clip prompts
-router.put('/:id/clips', async (req, res) => {
-  const project = storeGet(paramStr(req.params.id));
-  if (!project) {
-    res.status(404).json({ error: 'Project not found' });
-    return;
+router.put('/:id/clips', async (req, res, next) => {
+  try {
+    const project = storeGet(paramStr(req.params.id));
+    if (!project) {
+      res.status(404).json({ error: 'Project not found' });
+      return;
+    }
+
+    const { clips } = req.body;
+    if (!Array.isArray(clips)) {
+      res.status(400).json({ error: 'clips must be an array' });
+      return;
+    }
+
+    // Update or replace clips
+    project.clips = clips.map((c: any, i: number): Clip => ({
+      index: i,
+      imagePrompt: c.imagePrompt || '',
+      videoPrompt: c.videoPrompt || '',
+      status: 'pending',
+      retryCount: 0,
+    }));
+
+    await storeSet(project);
+    logger.info(`Updated ${project.clips.length} clips for project ${project.id}`);
+    res.json(project);
+  } catch (error) {
+    next(error);
   }
-
-  const { clips } = req.body;
-  if (!Array.isArray(clips)) {
-    res.status(400).json({ error: 'clips must be an array' });
-    return;
-  }
-
-  // Update or replace clips
-  project.clips = clips.map((c: any, i: number): Clip => ({
-    index: i,
-    imagePrompt: c.imagePrompt || '',
-    videoPrompt: c.videoPrompt || '',
-    status: 'pending',
-    retryCount: 0,
-  }));
-
-  await storeSet(project);
-  logger.info(`Updated ${project.clips.length} clips for project ${project.id}`);
-  res.json(project);
 });
 
 // POST /api/projects/:id/parse-pdf - upload and parse PDF
@@ -179,16 +203,20 @@ router.post('/:id/parse-pdf', upload.single('pdf'), async (req, res, next) => {
 });
 
 // DELETE /api/projects/:id - delete project
-router.delete('/:id', async (req, res) => {
-  const id = paramStr(req.params.id);
-  const existed = await storeDel(id);
-  if (!existed) {
-    res.status(404).json({ error: 'Project not found' });
-    return;
-  }
+router.delete('/:id', async (req, res, next) => {
+  try {
+    const id = paramStr(req.params.id);
+    const existed = await storeDel(id);
+    if (!existed) {
+      res.status(404).json({ error: 'Project not found' });
+      return;
+    }
 
-  logger.info(`Project deleted: ${id}`);
-  res.json({ message: 'Project deleted' });
+    logger.info(`Project deleted: ${id}`);
+    res.json({ message: 'Project deleted' });
+  } catch (error) {
+    next(error);
+  }
 });
 
 export { saveProjectAsync };

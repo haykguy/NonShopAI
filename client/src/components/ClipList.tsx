@@ -1,6 +1,6 @@
 import { ClipEditor } from './ClipEditor';
 import { PdfUploader } from './PdfUploader';
-import { FileText, Plus, Trash2, Wand2 } from 'lucide-react';
+import { FileText, Wand2 } from 'lucide-react';
 
 interface ClipData {
   imagePrompt: string;
@@ -23,8 +23,10 @@ export function ClipList({ clips, onChange, onParsePdf, loading, onToggleAiPanel
     onChange(updated);
   };
 
-  const addClip = () => {
-    onChange([...clips, { imagePrompt: '', videoPrompt: '' }]);
+  const addClipAfter = (index: number) => {
+    const next = [...clips];
+    next.splice(index + 1, 0, { imagePrompt: '', videoPrompt: '' });
+    onChange(next);
   };
 
   const removeClip = (index: number) => {
@@ -113,36 +115,6 @@ export function ClipList({ clips, onChange, onParsePdf, loading, onToggleAiPanel
             <Wand2 size={13} strokeWidth={2} />
             AI Assistant
           </button>
-          <button
-            type="button"
-            onClick={addClip}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '6px 12px',
-              borderRadius: 8,
-              border: '1px solid var(--border)',
-              background: 'var(--glass-bg)',
-              color: 'var(--text-secondary)',
-              fontSize: 12,
-              fontFamily: 'var(--font-body)',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.15s',
-            }}
-            onMouseEnter={e => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-bright)';
-              (e.currentTarget as HTMLButtonElement).style.color = 'var(--text)';
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border)';
-              (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
-            }}
-          >
-            <Plus size={13} strokeWidth={2.5} />
-            Add Clip
-          </button>
         </div>
       </div>
 
@@ -154,37 +126,15 @@ export function ClipList({ clips, onChange, onParsePdf, loading, onToggleAiPanel
       {/* Clip list */}
       <div style={{ padding: '12px 20px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {clips.map((clip, i) => (
-          <div key={i} style={{ position: 'relative' }} className="group">
-            <ClipEditor index={i} clip={clip} onChange={c => updateClip(i, c)} />
-            {clips.length > 1 && (
-              <button
-                type="button"
-                onClick={() => removeClip(i)}
-                style={{
-                  position: 'absolute',
-                  top: 10,
-                  right: 44,
-                  width: 26,
-                  height: 26,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'var(--error-dim)',
-                  border: '1px solid rgba(255,69,58,0.2)',
-                  borderRadius: 6,
-                  cursor: 'pointer',
-                  color: 'var(--error)',
-                  opacity: 0,
-                  transition: 'opacity 0.15s',
-                }}
-                className="group-hover-show"
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.opacity = '1'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.opacity = '0'; }}
-              >
-                <Trash2 size={13} strokeWidth={2} />
-              </button>
-            )}
-          </div>
+          <ClipEditor
+            key={i}
+            index={i}
+            clip={clip}
+            total={clips.length}
+            onChange={c => updateClip(i, c)}
+            onAddAfter={() => addClipAfter(i)}
+            onDelete={() => removeClip(i)}
+          />
         ))}
       </div>
     </div>

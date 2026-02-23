@@ -1,5 +1,5 @@
 import { NavLink, Link } from 'react-router-dom';
-import { Film, Home, FolderOpen, Settings, Sparkles, Cpu, Sun, Moon } from 'lucide-react';
+import { Film, Home, FolderOpen, Settings, Sparkles, Cpu, Sun, Moon, LayoutDashboard, Users, LibraryBig, Video } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -11,7 +11,10 @@ interface AccountInfo {
 }
 
 const navLinks = [
-  { to: '/', label: 'Home', icon: Home, exact: true },
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
+  { to: '/new-video', label: 'New Video', icon: Video, exact: false },
+  { to: '/library', label: 'Library', icon: LibraryBig, exact: false },
+  { to: '/accounts', label: 'Accounts', icon: Users, exact: false },
   { to: '/projects', label: 'Projects', icon: FolderOpen, exact: false },
   { to: '/settings', label: 'Settings', icon: Settings, exact: false },
 ];

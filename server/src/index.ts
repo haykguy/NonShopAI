@@ -1,3 +1,4 @@
+import './db'; // initialize SQLite database, run schema & seed
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -13,7 +14,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  origin: true,
   credentials: true,
 }));
 app.use(express.json({ limit: '50mb' }));
@@ -29,7 +30,7 @@ app.use(errorHandler);
 
 async function start() {
   await initStore();
-  app.listen(config.port, () => {
+  app.listen(config.port, '0.0.0.0', () => {
     logger.info(`Server running on http://localhost:${config.port}`);
     logger.info(`Output directory: ${config.outputDir}`);
   });

@@ -5,6 +5,7 @@ import { getProject, setProject } from './projects';
 import { compileVideo } from '../services/compiler';
 import { config } from '../config';
 import { logger } from '../utils/logger';
+import { db } from '../db';
 
 function paramStr(val: string | string[]): string {
   return Array.isArray(val) ? val[0] : val;
@@ -45,6 +46,17 @@ router.post('/:id/compile', async (req, res, next) => {
     project.finalVideoPath = outputPath;
     project.status = 'completed';
     await setProject(project);
+
+    // Auto-create a video_metadata record so this video appears in the Library
+    try {
+      db.prepare(`
+        INSERT INTO video_metadata (project_id, file_path, status)
+        VALUES (?, ?, 'completed')
+      `).run(project.id, outputPath);
+    } catch (metaErr: any) {
+      // Non-fatal: log but don't fail the compile response
+      logger.warn(`Could not create video_metadata record for project ${project.id}: ${metaErr.message}`);
+    }
 
     res.json({
       message: 'Compilation complete',

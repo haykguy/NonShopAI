@@ -6,6 +6,12 @@ import { PixarAiPage } from './pages/PixarAiPage';
 import { ProjectsPage } from './pages/ProjectsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
+import { NewVideoPage } from './pages/NewVideo';
+import { TopOfFunnelPage } from './pages/NewVideo/TopOfFunnel';
+import { CustomVideoPage } from './pages/NewVideo/Custom';
+import { Dashboard } from './pages/Dashboard';
+import { Library } from './pages/Library';
+import { AccountsPage } from './pages/Accounts';
 
 export default function App() {
   return (
@@ -16,6 +22,12 @@ export default function App() {
         <main style={{ flex: 1, paddingTop: 'var(--nav-h)' }}>
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/library" element={<Library />} />
+            <Route path="/accounts" element={<AccountsPage />} />
+            <Route path="/new-video" element={<NewVideoPage />} />
+            <Route path="/new-video/top-of-funnel" element={<TopOfFunnelPage />} />
+            <Route path="/new-video/custom" element={<CustomVideoPage />} />
             <Route path="/pixar-ai" element={<PixarAiPage />} />
             <Route path="/projects" element={<ProjectsPage />} />
             <Route path="/settings" element={<SettingsPage />} />

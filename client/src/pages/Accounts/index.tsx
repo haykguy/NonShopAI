@@ -102,7 +102,7 @@ function CircularProgress({ done, goal }: { done: number; goal: number }) {
   return (
     <div style={{ position: 'relative', width: 148, height: 148 }}>
       <svg width="148" height="148" style={{ transform: 'rotate(-90deg)' }}>
-        <circle cx="74" cy="74" r={r} fill="none" stroke="#2a2a2a" strokeWidth="8" />
+        <circle cx="74" cy="74" r={r} fill="none" stroke="var(--border)" strokeWidth="8" />
         <circle
           cx="74" cy="74" r={r} fill="none"
           stroke={stroke} strokeWidth="8"
@@ -170,7 +170,7 @@ function AccountModal({
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 20, padding: 28, width: 420, boxShadow: '0 24px 64px rgba(0,0,0,0.7)' }}>
+      <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 20, padding: 28, width: 420, boxShadow: '0 24px 64px rgba(0,0,0,0.5)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>
             {initial ? 'Edit Account' : 'New Account'}
@@ -190,7 +190,7 @@ function AccountModal({
               value={(form as any)[f.key]}
               onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))}
               placeholder={f.placeholder}
-              style={{ width: '100%', background: '#111', border: '1px solid #2a2a2a', borderRadius: 9, padding: '9px 12px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }}
+              style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9, padding: '9px 12px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }}
             />
           </div>
         ))}
@@ -206,8 +206,8 @@ function AccountModal({
                   key={p}
                   onClick={() => setForm(prev => ({ ...prev, platform: p }))}
                   style={{
-                    flex: 1, padding: '7px 4px', borderRadius: 9, border: `1px solid ${active ? color : '#2a2a2a'}`,
-                    background: active ? color + '22' : '#111', color: active ? color : 'var(--text-muted)',
+                    flex: 1, padding: '7px 4px', borderRadius: 9, border: `1px solid ${active ? color : 'var(--border)'}`,
+                    background: active ? color + '22' : 'var(--surface)', color: active ? color : 'var(--text-muted)',
                     cursor: 'pointer', fontSize: 11, fontWeight: active ? 700 : 400, fontFamily: 'var(--font-mono)',
                   }}
                 >
@@ -224,7 +224,7 @@ function AccountModal({
             type="number" min={1} max={200}
             value={form.monthly_video_goal}
             onChange={e => setForm(prev => ({ ...prev, monthly_video_goal: parseInt(e.target.value) || 20 }))}
-            style={{ width: '100%', background: '#111', border: '1px solid #2a2a2a', borderRadius: 9, padding: '9px 12px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }}
+            style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9, padding: '9px 12px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }}
           />
         </div>
 
@@ -233,7 +233,7 @@ function AccountModal({
           <select
             value={form.default_product_id}
             onChange={e => setForm(prev => ({ ...prev, default_product_id: e.target.value }))}
-            style={{ width: '100%', background: '#111', border: '1px solid #2a2a2a', borderRadius: 9, padding: '9px 12px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)' }}
+            style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9, padding: '9px 12px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)' }}
           >
             <option value="">None</option>
             {products.map(p => <option key={p.id} value={p.id.toString()}>{p.name}</option>)}
@@ -246,12 +246,12 @@ function AccountModal({
             value={form.notes}
             onChange={e => setForm(prev => ({ ...prev, notes: e.target.value }))}
             placeholder="Optional notes about this account..."
-            style={{ width: '100%', background: '#111', border: '1px solid #2a2a2a', borderRadius: 9, padding: '9px 12px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)', resize: 'vertical', minHeight: 70, boxSizing: 'border-box' }}
+            style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9, padding: '9px 12px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)', resize: 'vertical', minHeight: 70, boxSizing: 'border-box' }}
           />
         </div>
 
         <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={onClose} style={{ flex: 1, padding: '10px', borderRadius: 10, background: '#2a2a2a', border: 'none', color: 'var(--text)', cursor: 'pointer', fontSize: 13 }}>Cancel</button>
+          <button onClick={onClose} style={{ flex: 1, padding: '10px', borderRadius: 10, background: 'var(--glass-bg-heavy)', border: '1px solid var(--border)', color: 'var(--text)', cursor: 'pointer', fontSize: 13 }}>Cancel</button>
           <button
             onClick={handleSubmit}
             disabled={saving || !form.name.trim()}
@@ -297,7 +297,7 @@ function AssignVideoModal({
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 20, padding: 24, width: 480, maxHeight: '70vh', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.7)' }}>
+      <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 20, padding: 24, width: 480, maxHeight: '70vh', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.5)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Assign Video</h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={18} /></button>
@@ -315,16 +315,16 @@ function AssignVideoModal({
                   onClick={() => assign(v)}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
-                    background: '#111', border: '1px solid #2a2a2a', borderRadius: 11,
+                    background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 11,
                     cursor: 'pointer', textAlign: 'left', width: '100%',
                   }}
                 >
-                  <div style={{ width: 42, height: 42, borderRadius: 8, background: '#1a1a1a', overflow: 'hidden', flexShrink: 0 }}>
+                  <div style={{ width: 42, height: 42, borderRadius: 8, background: 'var(--card)', overflow: 'hidden', flexShrink: 0 }}>
                     {v.thumbnail_path ? (
                       <img src={v.thumbnail_path} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
                       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Play size={14} color="#2a2a2a" />
+                        <Play size={14} color="var(--border-bright)" />
                       </div>
                     )}
                   </div>
@@ -435,7 +435,7 @@ function AccountDetail({
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
           <button
             onClick={() => setShowEdit(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 13px', borderRadius: 9, background: '#1a1a1a', border: '1px solid #2a2a2a', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: 12.5 }}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 13px', borderRadius: 9, background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: 12.5 }}
           >
             <Edit2 size={13} /> Edit
           </button>
@@ -443,7 +443,7 @@ function AccountDetail({
       </div>
 
       {/* Goal section */}
-      <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 18, padding: '24px', marginBottom: 20 }}>
+      <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 18, padding: '24px', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 28, flexWrap: 'wrap' }}>
           <CircularProgress done={stats?.videos_this_month ?? 0} goal={account.monthly_video_goal} />
           <div>
@@ -456,7 +456,7 @@ function AccountDetail({
                   onChange={e => setGoalInput(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') saveGoal(); if (e.key === 'Escape') setEditingGoal(false); }}
                   autoFocus
-                  style={{ width: 80, background: '#111', border: '1px solid #a855f7', borderRadius: 8, padding: '6px 10px', fontSize: 14, color: 'var(--text)', fontFamily: 'var(--font-body)' }}
+                  style={{ width: 80, background: 'var(--surface)', border: '1px solid #a855f7', borderRadius: 8, padding: '6px 10px', fontSize: 14, color: 'var(--text)', fontFamily: 'var(--font-body)' }}
                 />
                 <button onClick={saveGoal} style={{ padding: '6px 10px', borderRadius: 8, background: '#a855f7', border: 'none', color: '#fff', cursor: 'pointer' }}>
                   <Check size={13} />
@@ -465,7 +465,7 @@ function AccountDetail({
             ) : (
               <button
                 onClick={() => { setEditingGoal(true); setGoalInput(account.monthly_video_goal.toString()); }}
-                style={{ fontSize: 13, color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: '#2a2a2a' }}
+                style={{ fontSize: 13, color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'var(--border)' }}
               >
                 Goal: {account.monthly_video_goal} videos/month
               </button>
@@ -476,7 +476,7 @@ function AccountDetail({
                 { label: 'All Time', val: stats?.videos_all_time ?? 0 },
                 { label: 'Days Left', val: daysLeft },
               ].map(chip => (
-                <div key={chip.label} style={{ background: '#111', border: '1px solid #2a2a2a', borderRadius: 10, padding: '8px 14px', textAlign: 'center' }}>
+                <div key={chip.label} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '8px 14px', textAlign: 'center' }}>
                   <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)', fontFamily: 'var(--font-display)' }}>{chip.val}</div>
                   <div style={{ fontSize: 10.5, color: 'var(--text-muted)' }}>{chip.label}</div>
                 </div>
@@ -487,7 +487,7 @@ function AccountDetail({
       </div>
 
       {/* Default Avatar */}
-      <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 18, padding: '20px', marginBottom: 20 }}>
+      <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 18, padding: '20px', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
           <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>Default Avatar</h3>
           <button
@@ -532,7 +532,7 @@ function AccountDetail({
         </div>
 
         {videos.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)', background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 14, fontSize: 13 }}>
+          <div style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14, fontSize: 13 }}>
             No videos assigned to this account
           </div>
         ) : (
@@ -560,7 +560,7 @@ function AccountDetail({
             value={deleteConfirm}
             onChange={e => setDeleteConfirm(e.target.value)}
             placeholder={account.name}
-            style={{ flex: 1, background: '#111', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 9, padding: '8px 12px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)' }}
+            style={{ flex: 1, background: 'var(--surface)', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 9, padding: '8px 12px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)' }}
           />
           <button
             onClick={handleDelete}
@@ -592,7 +592,7 @@ function AccountDetail({
       )}
       {showAvatarPicker && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 20, padding: 24, width: 400, maxHeight: '60vh', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.7)' }}>
+          <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 20, padding: 24, width: 400, maxHeight: '60vh', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.5)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Pick Avatar</h3>
               <button onClick={() => setShowAvatarPicker(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={18} /></button>
@@ -601,11 +601,11 @@ function AccountDetail({
               {avatars.length === 0 ? (
                 <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 32, color: 'var(--text-muted)' }}>No avatars yet</div>
               ) : avatars.map(a => (
-                <button key={a.id} onClick={() => handleAvatarChange(a.id)} style={{ background: 'none', border: `2px solid ${account.default_avatar_id === a.id ? '#a855f7' : '#2a2a2a'}`, borderRadius: 12, overflow: 'hidden', cursor: 'pointer', padding: 0 }}>
+                <button key={a.id} onClick={() => handleAvatarChange(a.id)} style={{ background: 'none', border: `2px solid ${account.default_avatar_id === a.id ? '#a855f7' : 'var(--border)'}`, borderRadius: 12, overflow: 'hidden', cursor: 'pointer', padding: 0 }}>
                   <div style={{ aspectRatio: '1/1' }}>
                     <img src={a.image_path} alt={a.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
-                  <div style={{ padding: '6px 8px', fontSize: 10.5, color: 'var(--text)', textAlign: 'left', background: '#111', fontWeight: 500 }}>{a.name}</div>
+                  <div style={{ padding: '6px 8px', fontSize: 10.5, color: 'var(--text)', textAlign: 'left', background: 'var(--surface)', fontWeight: 500 }}>{a.name}</div>
                 </button>
               ))}
             </div>
@@ -630,13 +630,13 @@ function VideoCard({ video, productName, onRemove }: { video: VideoMeta; product
   }, [menuOpen]);
 
   return (
-    <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, overflow: 'hidden', position: 'relative' }}>
-      <div style={{ aspectRatio: '9/16', background: '#111', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', position: 'relative' }}>
+      <div style={{ aspectRatio: '9/16', background: 'var(--surface)', position: 'relative', overflow: 'hidden' }}>
         {video.thumbnail_path ? (
           <img src={video.thumbnail_path} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Play size={16} color="#2a2a2a" />
+            <Play size={16} color="var(--border-bright)" />
           </div>
         )}
         {productName && (
@@ -652,7 +652,7 @@ function VideoCard({ video, productName, onRemove }: { video: VideoMeta; product
             <MoreVertical size={11} />
           </button>
           {menuOpen && (
-            <div style={{ position: 'absolute', bottom: 28, right: 0, background: '#222', border: '1px solid #333', borderRadius: 9, padding: 4, minWidth: 130, zIndex: 10, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+            <div style={{ position: 'absolute', bottom: 28, right: 0, background: 'var(--card-hover)', border: '1px solid var(--border-bright)', borderRadius: 9, padding: 4, minWidth: 130, zIndex: 10, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
               <button
                 onClick={() => { setMenuOpen(false); onRemove(); }}
                 style={{ display: 'block', width: '100%', textAlign: 'left', padding: '6px 10px', fontSize: 12, color: '#f87171', background: 'none', border: 'none', cursor: 'pointer', borderRadius: 6 }}
@@ -728,10 +728,10 @@ export function AccountsPage() {
     <div style={{ display: 'flex', height: 'calc(100vh - var(--nav-h))', overflow: 'hidden' }}>
       {/* Sidebar */}
       <div style={{
-        width: 280, flexShrink: 0, borderRight: '1px solid #2a2a2a',
-        background: '#111', display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        width: 280, flexShrink: 0, borderRight: '1px solid var(--border)',
+        background: 'var(--surface)', display: 'flex', flexDirection: 'column', overflow: 'hidden',
       }}>
-        <div style={{ padding: '20px 18px 12px', borderBottom: '1px solid #2a2a2a' }}>
+        <div style={{ padding: '20px 18px 12px', borderBottom: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <h1 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.02em' }}>Accounts</h1>
             <button
@@ -800,7 +800,7 @@ export function AccountsPage() {
       </div>
 
       {/* Main area */}
-      <div style={{ flex: 1, overflowY: 'auto', background: '#0f0f0f' }}>
+      <div style={{ flex: 1, overflowY: 'auto', background: 'var(--bg)' }}>
         {selected ? (
           <AccountDetail
             key={selected.id}

@@ -139,6 +139,53 @@ export interface CaptchaInfo {
   }>;
 }
 
+export interface CaptchaProvidersResponse {
+  AntiCaptcha?: string;
+  EzCaptcha?: string;
+  CapSolver?: string;
+  YesCaptcha?: string;
+  SolveCaptcha?: string;
+  '2Captcha'?: string;
+  freeCaptchaCredits?: number;
+}
+
+export interface CaptchaStatsSummary {
+  from: string;
+  to: string;
+  time_span: string;
+  sample_size_by_provider: Record<string, number>;
+  success_rate_by_provider: Record<string, number>;
+  by_status_code_images: Record<string, number>;
+  by_status_code_videos: Record<string, number>;
+  avg_captcha_ms: number;
+  avg_api_ms: number;
+  avg_attempt: number;
+}
+
+export interface CaptchaStatsRecord {
+  timestamp: string;
+  jobId: string;
+  provider: string;
+  taskId: string;
+  route: string;
+  statusText: string;
+  pageAction: string;
+  error: string;
+  statusCode: number;
+  captchaDurationMs: number;
+  apiDurationMs: number;
+  attemptNumber: number;
+}
+
+export interface CaptchaStatsResponse {
+  date?: string;
+  limit?: number;
+  provider?: string;
+  total: number;
+  summary?: CaptchaStatsSummary;
+  data: CaptchaStatsRecord[];
+}
+
 export interface ApiError {
   code: number;
   message: string;

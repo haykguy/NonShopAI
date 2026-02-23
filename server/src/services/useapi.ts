@@ -1,6 +1,7 @@
 import { config } from '../config';
 import { logger } from '../utils/logger';
 import { ApiRequestError, withRetry } from '../utils/retry';
+import { CaptchaProvidersResponse, CaptchaStatsResponse } from '../types/api';
 import {
   ImageGenResponse,
   AssetUploadResponse,
@@ -174,6 +175,35 @@ class UseApiClient {
   async getAccountHealth(email: string): Promise<AccountHealthResponse> {
     return withRetry(() =>
       this.request<AccountHealthResponse>('GET', `/v1/google-flow/accounts/${encodeURIComponent(email)}`)
+    );
+  }
+
+  async getCaptchaProviders(): Promise<CaptchaProvidersResponse> {
+    return withRetry(() =>
+      this.request<CaptchaProvidersResponse>('GET', '/v1/google-flow/accounts/captcha-providers')
+    );
+  }
+
+  async setCaptchaProviders(providers: Partial<Record<string, string>>): Promise<CaptchaProvidersResponse> {
+    return withRetry(() =>
+      this.request<CaptchaProvidersResponse>('POST', '/v1/google-flow/accounts/captcha-providers', providers)
+    );
+  }
+
+  async getCaptchaStats(opts: {
+    date?: string;
+    limit?: number;
+    provider?: string;
+    anonymized?: boolean;
+  } = {}): Promise<CaptchaStatsResponse> {
+    const params = new URLSearchParams();
+    if (opts.date) params.set('date', opts.date);
+    if (opts.limit !== undefined) params.set('limit', String(opts.limit));
+    if (opts.provider) params.set('provider', opts.provider);
+    if (opts.anonymized) params.set('anonymized', 'true');
+    const qs = params.toString() ? `?${params.toString()}` : '';
+    return withRetry(() =>
+      this.request<CaptchaStatsResponse>('GET', `/v1/google-flow/accounts/captcha-stats${qs}`)
     );
   }
 }

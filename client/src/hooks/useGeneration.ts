@@ -7,6 +7,8 @@ export function useGeneration(projectId: string | null) {
   const [connected, setConnected] = useState(false);
   const [pendingReview, setPendingReview] = useState<number | null>(null);
   const [pipelineError, setPipelineError] = useState<string | null>(null);
+  const [finalVideoPath, setFinalVideoPath] = useState<string | null>(null);
+  const [isCompiling, setIsCompiling] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
 
   const connect = useCallback(() => {
@@ -70,6 +72,24 @@ export function useGeneration(projectId: string | null) {
           ));
         }
 
+        if (event.type === 'compiling') {
+          // Pipeline finished generating — now compiling
+          setIsCompiling(true);
+          console.log(`[useGeneration] Auto-compiling...`, event.data);
+        }
+
+        if (event.type === 'pipeline_completed') {
+          setIsCompiling(false);
+          // Sync all clips to their final status from the server's project data
+          // (handles the case where some SSE events were missed)
+          if (event.data?.clips) {
+            setClips(event.data.clips);
+          }
+          if (event.data?.finalVideoPath) {
+            setFinalVideoPath(event.data.finalVideoPath);
+          }
+        }
+
         if (event.type === 'image_review_needed' && event.clipIndex !== undefined) {
           setClips(prev => prev.map(c =>
             c.index === event.clipIndex
@@ -128,6 +148,8 @@ export function useGeneration(projectId: string | null) {
     connected,
     pendingReview,
     pipelineError,
+    finalVideoPath,
+    isCompiling,
     progress,
     completedCount,
     failedCount,

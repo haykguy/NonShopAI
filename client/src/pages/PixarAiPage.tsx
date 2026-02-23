@@ -120,12 +120,24 @@ export function PixarAiPage() {
     setStep('generating');
   };
 
-  // Move to compile when generation finishes
+  // Move to compile when generation finishes (count-based fallback)
   useEffect(() => {
     if (gen.totalCount > 0 && gen.completedCount + gen.failedCount === gen.totalCount) {
       setStep('compile');
     }
   }, [gen.completedCount, gen.failedCount, gen.totalCount]);
+
+  // Move to compile immediately on pipeline_completed event (most reliable trigger)
+  // Also refresh project so finalVideoPath and status are up to date
+  useEffect(() => {
+    const lastEvent = gen.events[gen.events.length - 1];
+    if (lastEvent?.type === 'pipeline_completed') {
+      setStep('compile');
+      if (project?.id) {
+        loadProject(project.id);
+      }
+    }
+  }, [gen.events]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle no_pipeline (server restart / stale state) — surface error and go back to clips
   useEffect(() => {
@@ -387,6 +399,29 @@ export function PixarAiPage() {
             </button>
           </div>
 
+          {gen.isCompiling && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '12px 18px',
+                marginBottom: 16,
+                background: 'rgba(168,85,247,0.08)',
+                border: '1px solid rgba(168,85,247,0.25)',
+                borderRadius: 10,
+                fontSize: 13,
+                color: '#a855f7',
+                fontFamily: 'var(--font-body)',
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ flexShrink: 0 }}>
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
+              Compiling clips with borders and text overlay…
+            </div>
+          )}
+
           {reviewClip && <ImageReview clip={reviewClip} onSelect={selectImage} />}
           <ProgressDashboard
             clips={gen.clips}
@@ -461,9 +496,9 @@ export function PixarAiPage() {
 
           <VideoPreview
             projectId={project.id}
-            finalVideoPath={project.finalVideoPath}
+            finalVideoPath={gen.finalVideoPath ?? project.finalVideoPath}
             onCompile={compileVideo}
-            loading={loading}
+            loading={loading || gen.isCompiling}
             completedClipCount={
               gen.completedCount || project.clips.filter(c => c.status === 'completed').length
             }

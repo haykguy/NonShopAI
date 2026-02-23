@@ -103,8 +103,8 @@ function FilterSelect({ value, onChange, options, placeholder }: {
         onChange={e => onChange(e.target.value)}
         style={{
           appearance: 'none',
-          background: '#1a1a1a',
-          border: '1px solid #2a2a2a',
+          background: 'var(--card)',
+          border: '1px solid var(--border)',
           borderRadius: 9,
           padding: '7px 30px 7px 11px',
           fontSize: 12.5,
@@ -186,7 +186,7 @@ function VideoDetailPanel({
   return (
     <div style={{
       position: 'fixed', top: 0, right: 0, bottom: 0, width: 380,
-      background: '#141414', borderLeft: '1px solid #2a2a2a',
+      background: 'var(--surface)', borderLeft: '1px solid var(--border)',
       zIndex: 50, display: 'flex', flexDirection: 'column',
       boxShadow: '-8px 0 40px rgba(0,0,0,0.5)',
       animation: 'slideInRight 0.2s ease',
@@ -194,7 +194,7 @@ function VideoDetailPanel({
       <style>{`@keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }`}</style>
 
       {/* Header */}
-      <div style={{ padding: '16px 20px', borderBottom: '1px solid #2a2a2a', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>
             {video.product_id ? productsMap[video.product_id] ?? 'Video' : 'Video'}
@@ -212,7 +212,7 @@ function VideoDetailPanel({
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
         {/* Video preview */}
-        <div style={{ aspectRatio: '9/16', background: '#111', borderRadius: 12, overflow: 'hidden', marginBottom: 18 }}>
+        <div style={{ aspectRatio: '9/16', background: 'var(--bg)', borderRadius: 12, overflow: 'hidden', marginBottom: 18 }}>
           {video.file_path ? (
             <video
               controls
@@ -223,7 +223,7 @@ function VideoDetailPanel({
             <img src={video.thumbnail_path} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-              <Play size={28} color="#2a2a2a" />
+              <Play size={28} color="var(--border-bright)" />
               <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Download to preview</span>
             </div>
           )}
@@ -246,7 +246,7 @@ function VideoDetailPanel({
             value={accountId}
             onChange={e => saveAccount(e.target.value)}
             style={{
-              width: '100%', background: '#1a1a1a', border: '1px solid #2a2a2a',
+              width: '100%', background: 'var(--card)', border: '1px solid var(--border)',
               borderRadius: 9, padding: '8px 12px', fontSize: 13, color: 'var(--text)',
               fontFamily: 'var(--font-body)',
             }}
@@ -267,7 +267,7 @@ function VideoDetailPanel({
             onBlur={saveNotes}
             placeholder="Add notes..."
             style={{
-              width: '100%', background: '#1a1a1a', border: '1px solid #2a2a2a',
+              width: '100%', background: 'var(--card)', border: '1px solid var(--border)',
               borderRadius: 9, padding: '8px 12px', fontSize: 13, color: 'var(--text)',
               fontFamily: 'var(--font-body)', resize: 'vertical', minHeight: 80,
               boxSizing: 'border-box',
@@ -285,7 +285,7 @@ function VideoDetailPanel({
               style={{
                 flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                 padding: '9px 12px', borderRadius: 10, fontSize: 13, fontWeight: 600,
-                background: '#1a1a1a', border: '1px solid #2a2a2a', color: 'var(--text)',
+                background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)',
                 textDecoration: 'none',
               }}
             >
@@ -297,7 +297,7 @@ function VideoDetailPanel({
             style={{
               flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
               padding: '9px 12px', borderRadius: 10, fontSize: 13, fontWeight: 600,
-              background: '#1a1a1a', border: '1px solid #2a2a2a', color: 'var(--text)',
+              background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)',
               cursor: 'pointer',
             }}
           >
@@ -405,7 +405,7 @@ function VideosTab({ accounts, products, styles }: { accounts: Account[]; produc
           value={filterMonth}
           onChange={e => setFilterMonth(e.target.value)}
           style={{
-            background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 9,
+            background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 9,
             padding: '7px 11px', fontSize: 12.5, color: 'var(--text)',
             fontFamily: 'var(--font-body)', cursor: 'pointer',
           }}
@@ -415,7 +415,7 @@ function VideosTab({ accounts, products, styles }: { accounts: Account[]; produc
       {loading ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 14, aspectRatio: '9/16' }} />
+            <div key={i} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14, aspectRatio: '9/16' }} />
           ))}
         </div>
       ) : filtered.length === 0 ? (
@@ -435,19 +435,19 @@ function VideosTab({ accounts, products, styles }: { accounts: Account[]; produc
                 key={video.id}
                 onClick={() => setSelected(video)}
                 style={{
-                  background: '#1a1a1a',
-                  border: selected?.id === video.id ? '1.5px solid #a855f7' : '1px solid #2a2a2a',
+                  background: 'var(--card)',
+                  border: selected?.id === video.id ? '1.5px solid #a855f7' : '1px solid var(--border)',
                   borderRadius: 14, overflow: 'hidden', cursor: 'pointer',
                   transition: 'border-color 0.15s',
                 }}
               >
                 {/* Thumbnail */}
-                <div style={{ aspectRatio: '9/16', background: '#111', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ aspectRatio: '9/16', background: 'var(--surface)', position: 'relative', overflow: 'hidden' }}>
                   {video.thumbnail_path ? (
                     <img src={video.thumbnail_path} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
                     <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Play size={20} color="#2a2a2a" />
+                      <Play size={20} color="var(--border-bright)" />
                     </div>
                   )}
                   {productName && (
@@ -553,7 +553,7 @@ function AvatarsTab({ accounts }: { accounts: Account[] }) {
       {loading ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 14 }}>
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 14, aspectRatio: '1/1' }} />
+            <div key={i} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14, aspectRatio: '1/1' }} />
           ))}
         </div>
       ) : filtered.length === 0 ? (
@@ -569,7 +569,7 @@ function AvatarsTab({ accounts }: { accounts: Account[] }) {
           {filtered.map(avatar => (
             <div
               key={avatar.id}
-              style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 14, overflow: 'hidden', position: 'relative' }}
+              style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden', position: 'relative' }}
               className="avatar-card"
             >
               <style>{`.avatar-card:hover .avatar-actions { opacity: 1; }`}</style>
@@ -616,7 +616,7 @@ function AvatarsTab({ accounts }: { accounts: Account[] }) {
                   </div>
                 )}
                 {avatar.account_id && accountsMap[avatar.account_id] && (
-                  <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 5, background: '#2a2a2a', color: 'var(--text-muted)' }}>
+                  <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 5, background: 'var(--surface)', color: 'var(--text-muted)' }}>
                     {accountsMap[avatar.account_id]}
                   </span>
                 )}
@@ -631,7 +631,7 @@ function AvatarsTab({ accounts }: { accounts: Account[] }) {
                   position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 100,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 18, padding: 24, width: 360, boxShadow: '0 20px 60px rgba(0,0,0,0.7)' }}>
+                  <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 18, padding: 24, width: 360, boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}>
                     <h3 style={{ margin: '0 0 18px', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Edit Avatar</h3>
                     {([
                       { label: 'Name', key: 'name', placeholder: 'Avatar name' },
@@ -645,7 +645,7 @@ function AvatarsTab({ accounts }: { accounts: Account[] }) {
                           value={(editForm[field.key] as string) ?? ''}
                           onChange={e => setEditForm(f => ({ ...f, [field.key]: e.target.value }))}
                           placeholder={field.placeholder}
-                          style={{ width: '100%', background: '#111', border: '1px solid #2a2a2a', borderRadius: 8, padding: '8px 10px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }}
+                          style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }}
                         />
                       </div>
                     ))}
@@ -654,14 +654,14 @@ function AvatarsTab({ accounts }: { accounts: Account[] }) {
                       <select
                         value={editForm.account_id?.toString() ?? ''}
                         onChange={e => setEditForm(f => ({ ...f, account_id: e.target.value ? parseInt(e.target.value) : undefined }))}
-                        style={{ width: '100%', background: '#111', border: '1px solid #2a2a2a', borderRadius: 8, padding: '8px 10px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)' }}
+                        style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)' }}
                       >
                         <option value="">No account</option>
                         {accounts.map(a => <option key={a.id} value={a.id.toString()}>{a.name}</option>)}
                       </select>
                     </div>
                     <div style={{ display: 'flex', gap: 8 }}>
-                      <button onClick={() => setEditingId(null)} style={{ flex: 1, padding: '9px', borderRadius: 9, background: '#2a2a2a', border: 'none', color: 'var(--text)', cursor: 'pointer', fontSize: 13 }}>Cancel</button>
+                      <button onClick={() => setEditingId(null)} style={{ flex: 1, padding: '9px', borderRadius: 9, background: 'var(--glass-bg-heavy)', border: '1px solid var(--border)', color: 'var(--text)', cursor: 'pointer', fontSize: 13 }}>Cancel</button>
                       <button onClick={saveEdit} style={{ flex: 1, padding: '9px', borderRadius: 9, background: 'linear-gradient(to right, #9333ea, #db2777)', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>Save</button>
                     </div>
                   </div>
@@ -741,7 +741,7 @@ function ScriptsTab({ products, styles }: { products: Product[]; styles: VideoSt
       {loading ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} style={{ height: 100, background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 14 }} />
+            <div key={i} style={{ height: 100, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14 }} />
           ))}
         </div>
       ) : scripts.length === 0 ? (
@@ -754,7 +754,7 @@ function ScriptsTab({ products, styles }: { products: Product[]; styles: VideoSt
           {scripts.map(s => {
             const title = s.title || `Untitled Script ${formatDate(s.created_at)}`;
             return (
-              <div key={s.id} style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 14, padding: '14px 16px' }}>
+              <div key={s.id} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14, padding: '14px 16px' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{title}</div>
@@ -765,7 +765,7 @@ function ScriptsTab({ products, styles }: { products: Product[]; styles: VideoSt
                         </span>
                       )}
                       {s.video_style_id && stylesMap[s.video_style_id] && (
-                        <span style={{ fontSize: 10.5, padding: '2px 7px', borderRadius: 5, background: '#2a2a2a', color: 'var(--text-muted)' }}>
+                        <span style={{ fontSize: 10.5, padding: '2px 7px', borderRadius: 5, background: 'var(--surface)', color: 'var(--text-muted)' }}>
                           {stylesMap[s.video_style_id]}
                         </span>
                       )}
@@ -774,7 +774,7 @@ function ScriptsTab({ products, styles }: { products: Product[]; styles: VideoSt
                       {s.script_text.slice(0, 100)}{s.script_text.length > 100 ? '…' : ''}
                     </div>
                     {s.performance_notes && (
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)', borderLeft: '2px solid #2a2a2a', paddingLeft: 8 }}>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', borderLeft: '2px solid var(--border)', paddingLeft: 8 }}>
                         {s.performance_notes.slice(0, 80)}…
                       </div>
                     )}
@@ -789,7 +789,7 @@ function ScriptsTab({ products, styles }: { products: Product[]; styles: VideoSt
                     </button>
                     <button
                       onClick={() => startEdit(s)}
-                      style={{ width: 32, height: 32, borderRadius: 8, background: '#2a2a2a', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--glass-bg-heavy)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >
                       <Edit2 size={13} />
                     </button>
@@ -810,22 +810,22 @@ function ScriptsTab({ products, styles }: { products: Product[]; styles: VideoSt
       {/* Edit Script Modal */}
       {editingId !== null && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 18, padding: 24, width: 520, maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.7)' }}>
+          <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 18, padding: 24, width: 520, maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}>
             <h3 style={{ margin: '0 0 18px', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Edit Script</h3>
             <div style={{ marginBottom: 12 }}>
               <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Title</label>
-              <input value={editForm.title} onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))} placeholder="Script title" style={{ width: '100%', background: '#111', border: '1px solid #2a2a2a', borderRadius: 8, padding: '8px 10px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} />
+              <input value={editForm.title} onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))} placeholder="Script title" style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} />
             </div>
             <div style={{ marginBottom: 12 }}>
               <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Script Text</label>
-              <textarea value={editForm.script_text} onChange={e => setEditForm(f => ({ ...f, script_text: e.target.value }))} style={{ width: '100%', background: '#111', border: '1px solid #2a2a2a', borderRadius: 8, padding: '8px 10px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)', resize: 'vertical', minHeight: 160, boxSizing: 'border-box' }} />
+              <textarea value={editForm.script_text} onChange={e => setEditForm(f => ({ ...f, script_text: e.target.value }))} style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)', resize: 'vertical', minHeight: 160, boxSizing: 'border-box' }} />
             </div>
             <div style={{ marginBottom: 18 }}>
               <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Performance Notes</label>
-              <textarea value={editForm.performance_notes} onChange={e => setEditForm(f => ({ ...f, performance_notes: e.target.value }))} placeholder="e.g. Strong performer, 45k views avg. Hook in clip 1 works well." style={{ width: '100%', background: '#111', border: '1px solid #2a2a2a', borderRadius: 8, padding: '8px 10px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)', resize: 'vertical', minHeight: 80, boxSizing: 'border-box' }} />
+              <textarea value={editForm.performance_notes} onChange={e => setEditForm(f => ({ ...f, performance_notes: e.target.value }))} placeholder="e.g. Strong performer, 45k views avg. Hook in clip 1 works well." style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-body)', resize: 'vertical', minHeight: 80, boxSizing: 'border-box' }} />
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => setEditingId(null)} style={{ flex: 1, padding: '9px', borderRadius: 9, background: '#2a2a2a', border: 'none', color: 'var(--text)', cursor: 'pointer', fontSize: 13 }}>Cancel</button>
+              <button onClick={() => setEditingId(null)} style={{ flex: 1, padding: '9px', borderRadius: 9, background: 'var(--glass-bg-heavy)', border: '1px solid var(--border)', color: 'var(--text)', cursor: 'pointer', fontSize: 13 }}>Cancel</button>
               <button onClick={saveEdit} style={{ flex: 1, padding: '9px', borderRadius: 9, background: 'linear-gradient(to right, #9333ea, #db2777)', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>Save</button>
             </div>
           </div>
@@ -874,7 +874,7 @@ export function Library() {
       </div>
 
       {/* Tab bar + search */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #2a2a2a', marginBottom: 20, gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', marginBottom: 20, gap: 12 }}>
         <div style={{ display: 'flex', gap: 2 }}>
           <TabBtn active={tab === 'videos'} onClick={() => changeTab('videos')}>Videos</TabBtn>
           <TabBtn active={tab === 'avatars'} onClick={() => changeTab('avatars')}>Avatars</TabBtn>
@@ -887,7 +887,7 @@ export function Library() {
             onChange={e => setSearch(e.target.value)}
             placeholder={`Search ${tab}…`}
             style={{
-              background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 9,
+              background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 9,
               padding: '7px 11px 7px 28px', fontSize: 12.5, color: 'var(--text)',
               fontFamily: 'var(--font-body)', width: 220,
             }}

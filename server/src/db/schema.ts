@@ -80,5 +80,18 @@ export function runSchema(): void {
       notes TEXT,
       created_at TEXT DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS project_clips (
+      id           INTEGER PRIMARY KEY AUTOINCREMENT,
+      project_id   TEXT    NOT NULL,
+      clip_index   INTEGER NOT NULL,
+      image_path   TEXT,
+      video_path   TEXT,
+      image_prompt TEXT,
+      video_prompt TEXT,
+      status       TEXT    NOT NULL DEFAULT 'completed',
+      created_at   TEXT    NOT NULL DEFAULT (datetime('now')),
+      UNIQUE(project_id, clip_index)
+    );
   `);
 }

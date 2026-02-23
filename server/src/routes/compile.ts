@@ -48,9 +48,10 @@ router.post('/:id/compile', async (req, res, next) => {
     await setProject(project);
 
     // Auto-create a video_metadata record so this video appears in the Library
+    // Use INSERT OR IGNORE to avoid duplicates if the pipeline already created the record
     try {
       db.prepare(`
-        INSERT INTO video_metadata (project_id, file_path, status)
+        INSERT OR IGNORE INTO video_metadata (project_id, file_path, status)
         VALUES (?, ?, 'completed')
       `).run(project.id, outputPath);
     } catch (metaErr: any) {

@@ -3,8 +3,12 @@ import { Project, Clip, PipelineEvent } from '../types/project';
 import { generateImage, downloadSelectedImage } from './imageGen';
 import { uploadImageAsAsset } from './assetUpload';
 import { generateVideo } from './videoGen';
+import { compileVideo } from './compiler';
 import { logger } from '../utils/logger';
 import { saveProjectAsync } from './projectStore';
+import { db } from '../db';
+
+const MAX_CLIP_RETRIES = 3;
 
 export class PipelineOrchestrator extends EventEmitter {
   private project: Project;
@@ -37,7 +41,7 @@ export class PipelineOrchestrator extends EventEmitter {
     this.emit_event('pipeline_started');
 
     const clipsToProcess = this.project.clips.filter(
-      c => c.status !== 'completed' && c.status !== 'skipped'
+      c => c.status !== 'completed'
     );
     logger.info(`[Pipeline] Starting for project ${this.project.id}: ${clipsToProcess.length} clips to process (${this.project.clips.length} total)`);
 
@@ -49,37 +53,111 @@ export class PipelineOrchestrator extends EventEmitter {
             return;
           }
 
-          try {
-            await this.processClip(clip);
-          } catch (error: any) {
-            logger.error(`[Pipeline] Clip ${clip.index} failed: ${error.message}`, error.stack);
-            clip.status = 'failed';
-            clip.error = error.message;
-            this.emit_event('clip_failed', clip.index, { error: error.message });
+          let attempt = 0;
+          while (attempt < MAX_CLIP_RETRIES) {
+            attempt++;
+            try {
+              // Reset clip state for retry attempts
+              if (attempt > 1) {
+                logger.info(`[Pipeline] Retrying clip ${clip.index} (attempt ${attempt}/${MAX_CLIP_RETRIES})...`);
+                clip.error = undefined;
+                clip.status = 'pending';
+                this.emit_event('clip_status_changed', clip.index, { status: clip.status, attempt });
+              }
+              await this.processClip(clip);
+              // Record completed clip in DB
+              try {
+                db.prepare(`
+                  INSERT OR REPLACE INTO project_clips
+                    (project_id, clip_index, image_path, video_path, image_prompt, video_prompt, status)
+                  VALUES (?, ?, ?, ?, ?, ?, 'completed')
+                `).run(
+                  this.project.id,
+                  clip.index,
+                  clip.localImagePath ?? null,
+                  clip.localVideoPath ?? null,
+                  clip.imagePrompt ?? null,
+                  clip.videoPrompt ?? null
+                );
+              } catch (dbErr: any) {
+                logger.warn(`[Pipeline] Could not record clip ${clip.index} in DB: ${dbErr.message}`);
+              }
+              break; // Success — stop retrying
+            } catch (error: any) {
+              logger.error(`[Pipeline] Clip ${clip.index} attempt ${attempt} failed: ${error.message}`, error.stack);
+              clip.status = 'failed';
+              clip.error = error.message;
+              this.emit_event('clip_failed', clip.index, { error: error.message, attempt });
 
-            // Mark as skipped and continue with remaining clips
-            clip.status = 'skipped';
-            this.emit_event('clip_skipped', clip.index);
+              if (attempt >= MAX_CLIP_RETRIES) {
+                logger.error(`[Pipeline] Clip ${clip.index} exhausted all ${MAX_CLIP_RETRIES} retries — giving up`);
+                // Keep as 'failed' — do NOT mark as skipped
+                try {
+                  db.prepare(`
+                    INSERT OR REPLACE INTO project_clips
+                      (project_id, clip_index, image_path, video_path, image_prompt, video_prompt, status)
+                    VALUES (?, ?, ?, ?, ?, ?, 'failed')
+                  `).run(
+                    this.project.id,
+                    clip.index,
+                    clip.localImagePath ?? null,
+                    clip.localVideoPath ?? null,
+                    clip.imagePrompt ?? null,
+                    clip.videoPrompt ?? null
+                  );
+                } catch (dbErr: any) {
+                  logger.warn(`[Pipeline] Could not record failed clip ${clip.index} in DB: ${dbErr.message}`);
+                }
+              }
+            }
           }
         })
       );
 
       const completedClips = this.project.clips.filter(c => c.status === 'completed');
-      const skippedClips = this.project.clips.filter(c => c.status === 'skipped');
+      const failedClips = this.project.clips.filter(c => c.status === 'failed');
 
-      logger.info(`[Pipeline] Done — completed: ${completedClips.length}, skipped: ${skippedClips.length}, total: ${this.project.clips.length}`);
+      logger.info(`[Pipeline] Done — completed: ${completedClips.length}, failed: ${failedClips.length}, total: ${this.project.clips.length}`);
 
       if (completedClips.length === 0) {
         this.project.status = 'error';
         logger.error(`[Pipeline] All clips failed for project ${this.project.id}`);
         this.emit_event('pipeline_error', undefined, { message: 'No clips completed successfully' });
       } else {
-        this.project.status = 'draft'; // Ready for compilation
-        this.emit_event('pipeline_completed', undefined, {
-          completed: completedClips.length,
-          skipped: skippedClips.length,
-          total: this.project.clips.length,
-        });
+        // Auto-compile: concatenate completed clips with borders and text overlay
+        logger.info(`[Pipeline] Auto-compiling ${completedClips.length} completed clip(s)...`);
+        this.emit_event('compiling', undefined, { completedCount: completedClips.length });
+        try {
+          const outputPath = await compileVideo(this.project);
+          this.project.finalVideoPath = outputPath;
+          this.project.status = 'completed';
+          logger.info(`[Pipeline] Compilation finished: ${outputPath}`);
+          // Register in library
+          try {
+            db.prepare(`INSERT OR IGNORE INTO video_metadata (project_id, file_path, status) VALUES (?, ?, 'completed')`)
+              .run(this.project.id, outputPath);
+          } catch (dbErr: any) {
+            logger.warn(`[Pipeline] Could not create video_metadata record: ${dbErr.message}`);
+          }
+          this.emit_event('pipeline_completed', undefined, {
+            completed: completedClips.length,
+            failed: failedClips.length,
+            total: this.project.clips.length,
+            finalVideoPath: outputPath,
+            clips: this.project.clips,
+          });
+        } catch (compileErr: any) {
+          logger.error(`[Pipeline] Auto-compile failed: ${compileErr.message}`, compileErr.stack);
+          // Still mark as draft so user can manually compile
+          this.project.status = 'draft';
+          this.emit_event('pipeline_completed', undefined, {
+            completed: completedClips.length,
+            failed: failedClips.length,
+            total: this.project.clips.length,
+            compileError: compileErr.message,
+            clips: this.project.clips,
+          });
+        }
       }
     } finally {
       this.running = false;

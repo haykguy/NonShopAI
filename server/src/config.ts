@@ -13,6 +13,14 @@ export const config = {
   llmProvider: process.env.LLM_PROVIDER || 'mock',
   llmApiKey: process.env.LLM_API_KEY || '',
   llmModel: process.env.LLM_MODEL || '',
+  captchaProviders: {
+    AntiCaptcha: process.env.ANTICAPTCHA_API_KEY || '',
+    EzCaptcha: process.env.EZCAPTCHA_API_KEY || '',
+    CapSolver: process.env.CAPSOLVER_API_KEY || '',
+    YesCaptcha: process.env.YESCAPTCHA_API_KEY || '',
+    SolveCaptcha: process.env.SOLVECAPTCHA_API_KEY || '',
+    '2Captcha': process.env.TWOCAPTCHA_API_KEY || '',
+  },
 };
 
 export function validateConfig(): void {

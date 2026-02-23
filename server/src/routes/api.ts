@@ -10,6 +10,7 @@ import avatarsRouter from './avatars';
 import accountsRouter from './accounts';
 import videoMetadataRouter from './videoMetadata';
 import savedScriptsRouter from './savedScripts';
+import captchaRouter from './captcha';
 
 const router = Router();
 
@@ -24,5 +25,6 @@ router.use('/avatars', avatarsRouter);
 router.use('/accounts', accountsRouter);
 router.use('/video-metadata', videoMetadataRouter);
 router.use('/scripts', savedScriptsRouter);
+router.use('/captcha', captchaRouter);
 
 export default router;

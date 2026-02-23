@@ -115,8 +115,8 @@ function StatCard({ icon, label, value, sub, progress, color = '#a855f7', loadin
   return (
     <div
       style={{
-        background: '#1a1a1a',
-        border: '1px solid #2a2a2a',
+        background: 'var(--card)',
+        border: '1px solid var(--border)',
         borderRadius: 16,
         padding: '20px 22px',
         flex: 1,
@@ -156,7 +156,7 @@ function StatCard({ icon, label, value, sub, progress, color = '#a855f7', loadin
             <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 4 }}>{sub}</div>
           )}
           {progress !== undefined && (
-            <div style={{ marginTop: 10, height: 4, background: '#2a2a2a', borderRadius: 99, overflow: 'hidden' }}>
+            <div style={{ marginTop: 10, height: 4, background: 'var(--border)', borderRadius: 99, overflow: 'hidden' }}>
               <div
                 style={{
                   height: '100%',
@@ -207,9 +207,9 @@ function VideoCard({ video, accountName, styleName, productName, onDelete }: {
   };
 
   return (
-    <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 14, overflow: 'hidden', position: 'relative' }}>
+    <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden', position: 'relative' }}>
       {/* Thumbnail — 9:16 */}
-      <div style={{ aspectRatio: '9/16', background: '#111', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ aspectRatio: '9/16', background: 'var(--surface)', position: 'relative', overflow: 'hidden' }}>
         {video.thumbnail_path ? (
           <img
             src={video.thumbnail_path}
@@ -217,7 +217,7 @@ function VideoCard({ video, accountName, styleName, productName, onDelete }: {
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : (
-          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#141414' }}>
+          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)' }}>
             <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(168,85,247,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Play size={16} color="#a855f7" />
             </div>
@@ -260,7 +260,7 @@ function VideoCard({ video, accountName, styleName, productName, onDelete }: {
           {menuOpen && (
             <div style={{
               position: 'absolute', bottom: 34, right: 0,
-              background: '#222', border: '1px solid #333', borderRadius: 10, padding: 4,
+              background: 'var(--card-hover)', border: '1px solid var(--border-bright)', borderRadius: 10, padding: 4,
               minWidth: 140, zIndex: 10, boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
             }}>
               {video.file_path && (
@@ -268,7 +268,7 @@ function VideoCard({ video, accountName, styleName, productName, onDelete }: {
                   href={video.file_path}
                   download
                   style={{ display: 'block', padding: '7px 12px', fontSize: 12.5, color: 'var(--text)', textDecoration: 'none', borderRadius: 7 }}
-                  onMouseEnter={e => (e.currentTarget.style.background = '#2a2a2a')}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--glass-bg-heavy)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                 >
                   Download
@@ -322,7 +322,7 @@ function AccountGoalRow({ account, stats }: { account: Account; stats: AccountSt
         alignItems: 'center',
         gap: 10,
         padding: '10px 0',
-        borderBottom: '1px solid #2a2a2a',
+        borderBottom: '1px solid var(--border)',
       }}
     >
       {platformBadge(account.platform)}
@@ -330,7 +330,7 @@ function AccountGoalRow({ account, stats }: { account: Account; stats: AccountSt
         <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {account.name}
         </div>
-        <div style={{ height: 4, background: '#2a2a2a', borderRadius: 99, overflow: 'hidden' }}>
+        <div style={{ height: 4, background: 'var(--border)', borderRadius: 99, overflow: 'hidden' }}>
           <div
             style={{
               height: '100%',
@@ -491,15 +491,15 @@ export function Dashboard() {
           {loading ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 14, aspectRatio: '9/16' }} />
+                <div key={i} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14, aspectRatio: '9/16' }} />
               ))}
             </div>
           ) : recentVideos.length === 0 ? (
             <div style={{
-              background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 16,
+              background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 16,
               padding: '48px 24px', textAlign: 'center',
             }}>
-              <Video size={32} color="#2a2a2a" style={{ marginBottom: 12 }} />
+              <Video size={32} color="var(--border-bright)" style={{ marginBottom: 12 }} />
               <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>No videos yet</div>
               <Link
                 to="/new-video"
@@ -543,7 +543,7 @@ export function Dashboard() {
             </Link>
           </div>
 
-          <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 16, padding: '12px 16px' }}>
+          <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 16, padding: '12px 16px' }}>
             {loading ? (
               <div style={{ padding: '24px 0', display: 'flex', justifyContent: 'center' }}>
                 <Loader2 size={20} color="var(--text-muted)" style={{ animation: 'spin 1s linear infinite' }} />
@@ -568,7 +568,7 @@ export function Dashboard() {
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                   padding: '9px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600,
-                  border: '1px dashed #3a3a3a', color: 'var(--text-secondary)',
+                  border: '1px dashed var(--border-bright)', color: 'var(--text-secondary)',
                   textDecoration: 'none', transition: 'all 0.15s',
                 }}
                 onMouseEnter={e => {
@@ -576,7 +576,7 @@ export function Dashboard() {
                   e.currentTarget.style.color = '#a855f7';
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = '#3a3a3a';
+                  e.currentTarget.style.borderColor = 'var(--border-bright)';
                   e.currentTarget.style.color = 'var(--text-secondary)';
                 }}
               >

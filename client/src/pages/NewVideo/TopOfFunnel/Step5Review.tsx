@@ -145,6 +145,7 @@ export function Step5Review({ state, onEdit }: Props) {
         videoPrompt: c.video_prompt,
         status: 'pending',
         retryCount: 0,
+        avatarImageUrl: selectedAvatar?.image_url,
       }));
 
       const allClips = [...prehookClip, ...scriptClips];

@@ -66,6 +66,39 @@ export interface WizardState {
   scriptError: string | null;
 }
 
+// ── Helper: Apply avatar context to script prompts ────────────────────────────
+
+function applyAvatarToScript(avatar: Avatar | null, script: Script | null): Script | null {
+  if (!script || !avatar || !avatar.image_url) {
+    return script;
+  }
+
+  // Detect gender from style_tags (first element is typically the gender)
+  const genderTag = avatar.style_tags?.[0]?.toLowerCase() || '';
+  let pronoun = 'They say';
+  if (genderTag === 'female') {
+    pronoun = 'She says';
+  } else if (genderTag === 'male') {
+    pronoun = 'He says';
+  }
+
+  // Update each clip's video_prompt to include the voice line and pronoun
+  const updatedClips = script.clips.map(clip => {
+    if (!clip.voice_line) {
+      return clip;
+    }
+    return {
+      ...clip,
+      video_prompt: `${pronoun}: "${clip.voice_line}". ${clip.video_prompt}`,
+    };
+  });
+
+  return {
+    ...script,
+    clips: updatedClips,
+  };
+}
+
 // ── Step progress bar ─────────────────────────────────────────────────────────
 
 const STEPS = ['Style', 'Product', 'Script', 'Avatar', 'Generate'];
@@ -278,7 +311,12 @@ export function TopOfFunnelPage() {
             selected={state.selectedAvatar}
             renderMode={state.renderMode}
             onSelect={avatar => set('selectedAvatar', avatar)}
-            onContinue={next}
+            onContinue={() => {
+              // Apply avatar context (gender, voice line) to script prompts before advancing
+              const updatedScript = applyAvatarToScript(state.selectedAvatar, state.script);
+              set('script', updatedScript);
+              next();
+            }}
           />
         )}
         {state.currentStep === 5 && (

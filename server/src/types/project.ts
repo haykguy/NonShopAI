@@ -23,6 +23,8 @@ export interface Clip {
   status: ClipStatus;
   retryCount: number;
   error?: string;
+  // Avatar image (pre-supplied starting frame for Veo 3)
+  avatarImageUrl?: string;
   // Image generation
   imageJobId?: string;
   generatedImages?: GeneratedImage[];

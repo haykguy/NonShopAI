@@ -59,6 +59,7 @@ router.post('/', async (req, res, next) => {
         videoPrompt: c.videoPrompt || '',
         status: 'pending',
         retryCount: 0,
+        avatarImageUrl: c.avatarImageUrl || undefined,
       }));
     } else {
       clips = Array.from({ length: count }, (_, i): Clip => ({

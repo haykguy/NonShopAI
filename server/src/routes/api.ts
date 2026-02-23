@@ -11,6 +11,7 @@ import accountsRouter from './accounts';
 import videoMetadataRouter from './videoMetadata';
 import savedScriptsRouter from './savedScripts';
 import captchaRouter from './captcha';
+import imagesRouter from './images';
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use('/accounts', accountsRouter);
 router.use('/video-metadata', videoMetadataRouter);
 router.use('/scripts', savedScriptsRouter);
 router.use('/captcha', captchaRouter);
+router.use('/images', imagesRouter);
 
 export default router;

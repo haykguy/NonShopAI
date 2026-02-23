@@ -162,46 +162,40 @@ router.get('/:id/status', (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
   })}\n\n`);
 
-  const pipeline = getPipeline(projectId);
+  // Pipeline might not be registered yet due to async startup
+  // so we'll check periodically for up to 10 seconds
+  let pipeline = getPipeline(projectId);
+  let pipelineWaitAttempts = 0;
+  const maxWaitAttempts = 20; // 20 * 500ms = 10 seconds
 
   if (!pipeline) {
     // Only treat as an error if the project was mid-generation (e.g. server restarted)
     if (project.status === 'generating') {
-      logger.warn(`Project ${projectId} is 'generating' but has no active pipeline — resetting to error`);
-      project.status = 'error';
-      project.clips.forEach(clip => {
-        if (clip.status !== 'completed' && clip.status !== 'skipped') {
-          clip.status = 'failed';
-          clip.error = 'Server restarted while pipeline was running';
-        }
-      });
-      saveProjectAsync(project);
-      res.write(`data: ${JSON.stringify({
-        type: 'no_pipeline',
-        projectId: project.id,
-        data: { message: 'Server restarted mid-generation. Please start generation again.', project },
-        timestamp: new Date().toISOString(),
-      })}\n\n`);
+      logger.warn(`Project ${projectId} is 'generating' but has no active pipeline — will wait for pipeline registration`);
+    } else {
+      logger.info(`SSE connected for project ${projectId} (no active pipeline, status: ${project.status})`);
     }
-    // For draft/completed/error projects with no pipeline, no event needed — just stream keepalives
-    logger.info(`SSE connected for project ${projectId} (no active pipeline, status: ${project.status})`);
   } else {
     logger.info(`SSE connected for project ${projectId} (pipeline running: ${pipeline.isRunning()})`);
   }
 
-  // Listen for pipeline events
   const listener = (event: any) => {
     res.write(`data: ${JSON.stringify(event)}\n\n`);
   };
 
-  if (pipeline) {
-    pipeline.on('progress', listener);
-  }
-
-  // Keep alive
+  // Keep alive + pipeline detection
   const keepAlive = setInterval(() => {
+    // If we don't have pipeline yet, keep trying to find it
+    if (!pipeline && pipelineWaitAttempts < maxWaitAttempts) {
+      pipeline = getPipeline(projectId);
+      pipelineWaitAttempts++;
+      if (pipeline) {
+        logger.info(`Pipeline found after ${pipelineWaitAttempts * 500}ms`);
+        pipeline.on('progress', listener);
+      }
+    }
     res.write(': keepalive\n\n');
-  }, 15000);
+  }, 500);
 
   req.on('close', () => {
     clearInterval(keepAlive);
